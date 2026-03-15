@@ -12,7 +12,7 @@ Thanks for your interest in contributing. This document covers local setup, proj
 
 1. **Clone and install**
    ```bash
-   git clone https://github.com/YOUR_USER/core-web-vitals-live.git
+   git clone https://github.com/machal/Core-Web-Vitals-Live.git
    cd core-web-vitals-live
    npm install
    ```
@@ -33,8 +33,7 @@ Thanks for your interest in contributing. This document covers local setup, proj
 - **`entrypoints/`** – WXT entrypoints:
   - **`content.ts`** – Content script: initializes metrics (web-vitals), HUD, and CLS/INP/LCP visualizers; reads options from storage; sends metrics to the background.
   - **`background.ts`** – Service worker: updates badge and stores last metrics per tab for the popup.
-  - **`popup/`** – Popup UI (metrics summary, Reload, Options).
-  - **`options/`** – Options page (toggles and HUD position).
+  - **`popup/`** – Popup UI (metrics summary, settings toggles, Reload).
 - **`lib/`** – Shared logic used by the content script:
   - **`metrics.ts`** – Wraps web-vitals (LCP, INP, CLS, FCP, TTFB); reports all changes.
   - **`types.ts`** – Metric state, options state, thresholds.
@@ -83,7 +82,7 @@ Examples:
 ## How to test
 
 - **Popup:** Install the extension, open a page, click the extension icon. Check that LCP/INP/CLS appear (or “Open a webpage…” if none). Use Reload and Options.
-- **Options:** Right‑click icon → Options. Toggle HUD, CLS, INP, LCP and position; Save. Reload the test page and confirm behavior.
+- **Settings:** Click the extension icon and use the settings toggles in the popup. Toggle HUD, CLS, INP, LCP; reload the test page and confirm behavior.
 - **HUD:** With HUD on, confirm life bars update as you interact and scroll. Minimize and restore.
 - **CLS:** On a page that shifts layout (e.g. late-loading images or ads), confirm purple overlays and labels appear and fade.
 - **INP:** Trigger slow handlers (e.g. heavy JS on click); confirm amber/red badges with duration.
@@ -94,6 +93,6 @@ If you add new features, please add a short note in the PR on how you tested the
 
 ## Questions
 
-Open a [GitHub Discussion](https://github.com/YOUR_USER/core-web-vitals-live/discussions) or an [Issue](https://github.com/YOUR_USER/core-web-vitals-live/issues) for bugs and feature requests.
+Open a [GitHub Discussion](https://github.com/machal/Core-Web-Vitals-Live/discussions) or an [Issue](https://github.com/machal/Core-Web-Vitals-Live/issues) for bugs and feature requests.
 
 Thank you for contributing.

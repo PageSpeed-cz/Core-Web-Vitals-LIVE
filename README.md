@@ -4,7 +4,7 @@
 
 A Chrome (and Chromium) extension that shows real-time [Core Web Vitals](https://web.dev/vitals/) (LCP, INP, CLS) on any page, with a game-like HUD and visual overlays so you can see exactly what’s hurting your metrics.
 
-*Screenshot: HUD in the corner + CLS purple overlays and INP badges. Add a screenshot or GIF to `.github/screenshot.png` and link it here.*
+<!-- TODO: Add screenshot — see STORE_ASSETS.md for guidance -->
 
 ## Features
 
@@ -13,8 +13,8 @@ A Chrome (and Chromium) extension that shows real-time [Core Web Vitals](https:/
 - **INP visualization** – Badge near the cursor or target for slow interactions (>50 ms): amber for 50–200 ms, red for >200 ms, with duration in ms.
 - **LCP visualization** – Pulsing border and “LCP element” label around the current Largest Contentful Paint element.
 - **Toolbar badge** – Green / amber / red with the worst metric value so you see status at a glance.
-- **Popup** – Summary of current metrics with progress bars and links to Options and Reload.
-- **Options** – Toggle HUD, CLS/INP/LCP visualizations, and HUD position (bottom-right, bottom-left, top-right). Settings sync across devices (Chrome sync).
+- **Popup** – Summary of current metrics with progress bars, settings toggles, and Reload.
+- **Settings (in popup)** – Toggle HUD, CLS/INP/LCP visualizations. Settings sync across devices (Chrome sync).
 
 All metrics are measured with the same logic and thresholds as [web-vitals](https://github.com/GoogleChrome/web-vitals) and Google tools (Page Speed Insights, Search Console, CrUX).
 
@@ -24,7 +24,7 @@ All metrics are measured with the same logic and thresholds as [web-vitals](http
 
 1. Clone the repo and install dependencies:
    ```bash
-   git clone https://github.com/YOUR_USER/core-web-vitals-live.git
+   git clone https://github.com/machal/Core-Web-Vitals-Live.git
    cd core-web-vitals-live
    npm install
    ```
@@ -47,8 +47,7 @@ All metrics are measured with the same logic and thresholds as [web-vitals](http
 4. **CLS**: any layout shift is highlighted with a purple overlay and value.
 5. **INP**: slow clicks/taps show a duration badge (amber or red) near the interaction.
 6. **LCP**: the current LCP element is outlined with a blue border and “LCP element” label.
-7. Click the extension icon for the **popup** (summary + Reload / Options).
-8. Right‑click the icon → **Options** to turn visualizations on/off and change HUD position. Reload the page after saving to apply.
+7. Click the extension icon for the **popup** (summary + settings toggles + Reload).
 
 ## Metric thresholds
 
@@ -84,9 +83,13 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for project structure, commit conventions
 - [ ] Optional “cost of poor CWV” / business-impact view (e.g. rough conversion or revenue impact).
 - [ ] More HUD positions and optional draggable overlay.
 
+## Privacy
+
+See [PRIVACY_POLICY.md](PRIVACY_POLICY.md) for details on data handling. The extension does not collect or transmit any personal data.
+
 ## License
 
-Apache-2.0
+[Apache-2.0](LICENSE)
 
 ## Related
 

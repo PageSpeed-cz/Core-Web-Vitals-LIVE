@@ -26,5 +26,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Metrics measured with [web-vitals](https://github.com/GoogleChrome/web-vitals) (LCP, INP, CLS, FCP, TTFB); report-all-changes for live updates.
 - Chrome (Manifest V3) and Chromium-based browsers support; Firefox build via `npm run build:firefox`.
 
-[Unreleased]: https://github.com/YOUR_USER/core-web-vitals-live/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/YOUR_USER/core-web-vitals-live/releases/tag/v0.1.0
+[Unreleased]: https://github.com/machal/Core-Web-Vitals-Live/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/machal/Core-Web-Vitals-Live/releases/tag/v0.1.0
