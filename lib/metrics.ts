@@ -56,7 +56,6 @@ function formatTTFB(value: number): string {
  */
 export function initMetrics(callbacks: MetricsCallbacks): void {
   const reportAllChanges = true;
-  const opts = { reportAllChanges };
 
   const report = (name: string, metric: Metric) => {
     callbacks.onMetric?.(name, metric);
@@ -82,23 +81,23 @@ export function initMetrics(callbacks: MetricsCallbacks): void {
   // LCP with attribution (we need element from entries; attribution gives selector)
   onLCPAttribution((metric) => {
     report('LCP', metric);
-  }, opts);
+  }, { reportAllChanges });
 
   onINP((metric) => {
     report('INP', metric);
-  }, opts);
+  }, { reportAllChanges });
 
   onCLS((metric) => {
     report('CLS', metric);
-  }, opts);
+  }, { reportAllChanges });
 
   onFCP((metric) => {
     report('FCP', metric);
-  }, opts);
+  }, { reportAllChanges });
 
   onTTFB((metric) => {
     report('TTFB', metric);
-  }, opts);
+  }, { reportAllChanges });
 }
 
 export {

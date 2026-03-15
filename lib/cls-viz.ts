@@ -3,8 +3,10 @@
  */
 
 const PREFIX = 'cwv-live-cls';
-const FADE_MS = 2000;
+const FADE_MS = 4000;
 const Z_INDEX = 2147483645;
+/** Skip imperceptible layout shifts below this score. */
+const MIN_SHIFT_VALUE = 0.005;
 
 const STYLES = `
 .${PREFIX}-overlay {
@@ -60,6 +62,7 @@ export function initCLSViz(): () => void {
     for (const entry of list.getEntries()) {
       const le = entry as LayoutShiftEntry;
       if (le.hadRecentInput) continue;
+      if (le.value < MIN_SHIFT_VALUE) continue;
       showCLSOverlay(le);
     }
   });
