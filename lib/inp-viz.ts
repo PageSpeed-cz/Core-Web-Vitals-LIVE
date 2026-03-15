@@ -1,10 +1,11 @@
 /**
- * Core Web Vitals Live – INP visualizer: cursor/target badge for slow interactions (>50ms).
+ * pagespeed.One – INP visualizer: cursor/target badge for slow interactions (>50ms).
  */
 
 const PREFIX = 'cwv-live-inp';
 const DURATION_THRESHOLD_MS = 50;
 const DISMISS_MS = 1800;
+const CLEANUP_DELAY_MS = 10_000;
 const Z_INDEX = 2147483645;
 
 const STYLES = `
@@ -12,13 +13,15 @@ const STYLES = `
   position: fixed;
   pointer-events: none;
   z-index: ${Z_INDEX};
-  padding: 4px 8px;
+  padding: 4px 10px;
   border-radius: 6px;
-  font-family: system-ui, sans-serif;
+  font-family: 'Special Gothic Expanded One', system-ui, sans-serif;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
   color: #fff;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
   white-space: nowrap;
   box-sizing: border-box;
   animation: ${PREFIX}-pop 0.2s ease;
@@ -26,12 +29,12 @@ const STYLES = `
   margin-top: -8px;
 }
 .${PREFIX}-badge.${PREFIX}-amber {
-  background: #E6A800;
-  border: 1px solid rgba(0,0,0,0.2);
+  background: #FFA400;
+  border: 1px solid rgba(0,0,0,0.15);
 }
 .${PREFIX}-badge.${PREFIX}-red {
-  background: #D93025;
-  border: 1px solid rgba(0,0,0,0.2);
+  background: #FF00AA;
+  border: 1px solid rgba(0,0,0,0.15);
   animation: ${PREFIX}-pop 0.2s ease, ${PREFIX}-pulse 0.6s ease 0.2s 2;
 }
 @keyframes ${PREFIX}-pop {
@@ -39,8 +42,8 @@ const STYLES = `
   to { opacity: 1; transform: translate(-50%, -100%) scale(1); }
 }
 @keyframes ${PREFIX}-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(217, 48, 37, 0.4); }
-  50% { box-shadow: 0 0 0 6px rgba(217, 48, 37, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 0, 170, 0.4); }
+  50% { box-shadow: 0 0 0 6px rgba(255, 0, 170, 0); }
 }
 .${PREFIX}-badge.${PREFIX}-fade {
   opacity: 0;
@@ -60,10 +63,14 @@ function ensureStyles(): void {
 interface EventTimingEntry extends PerformanceEntry {
   duration: number;
   target: Node | null;
+  interactionId?: number;
 }
 
 let lastPointerX = 0;
 let lastPointerY = 0;
+
+let inpVizSeenInteractions: Set<number> | null = null;
+let inpVizCleanupTimer: ReturnType<typeof setTimeout> | null = null;
 
 function trackPointer(): void {
   const updatePointer = (e: MouseEvent | TouchEvent) => {
@@ -85,7 +92,7 @@ function showBadge(duration: number, x: number, y: number): void {
   const isPoor = duration > 200;
   const el = document.createElement('div');
   el.className = `${PREFIX}-badge ${isPoor ? `${PREFIX}-red` : `${PREFIX}-amber`}`;
-  el.textContent = `⚡ ${Math.round(duration)}ms`;
+  el.textContent = `${Math.round(duration)} ms`;
   el.style.left = `${x}px`;
   el.style.top = `${y}px`;
   document.body.appendChild(el);
@@ -100,10 +107,21 @@ export function initINPViz(): () => void {
   ensureStyles();
   trackPointer();
 
+  inpVizSeenInteractions = new Set<number>();
+  inpVizCleanupTimer = null;
+
   const observer = new PerformanceObserver((list) => {
+    const bestPerInteraction = new Map<
+      number,
+      { duration: number; x: number; y: number }
+    >();
+    const seen = inpVizSeenInteractions!;
+
     for (const entry of list.getEntries()) {
       const e = entry as EventTimingEntry;
       if (e.duration < DURATION_THRESHOLD_MS) continue;
+      if (!e.interactionId) continue;
+      if (seen.has(e.interactionId)) continue;
 
       let x = lastPointerX;
       let y = lastPointerY;
@@ -116,7 +134,27 @@ export function initINPViz(): () => void {
           // use last pointer if getBoundingClientRect fails
         }
       }
-      showBadge(e.duration, x, y);
+
+      const existing = bestPerInteraction.get(e.interactionId);
+      if (!existing || e.duration > existing.duration) {
+        bestPerInteraction.set(e.interactionId, {
+          duration: e.duration,
+          x,
+          y,
+        });
+      }
+    }
+
+    for (const [id, { duration, x, y }] of bestPerInteraction) {
+      seen.add(id);
+      showBadge(duration, x, y);
+    }
+
+    if (!inpVizCleanupTimer) {
+      inpVizCleanupTimer = setTimeout(() => {
+        inpVizSeenInteractions?.clear();
+        inpVizCleanupTimer = null;
+      }, CLEANUP_DELAY_MS);
     }
   });
 
@@ -124,17 +162,23 @@ export function initINPViz(): () => void {
     observer.observe({
       type: 'event',
       durationThreshold: DURATION_THRESHOLD_MS,
-      buffered: true,
     });
   } catch {
-    // some browsers may not support durationThreshold
-    observer.observe({ type: 'event', buffered: true });
+    observer.observe({ type: 'event' });
   }
 
-  return () => observer.disconnect();
+  return () => {
+    if (inpVizCleanupTimer) clearTimeout(inpVizCleanupTimer);
+    inpVizCleanupTimer = null;
+    inpVizSeenInteractions?.clear();
+    observer.disconnect();
+  };
 }
 
 export function destroyINPViz(): void {
+  if (inpVizCleanupTimer) clearTimeout(inpVizCleanupTimer);
+  inpVizCleanupTimer = null;
+  inpVizSeenInteractions?.clear();
   document.querySelectorAll(`.${PREFIX}-badge`).forEach((el) => el.remove());
   styleEl?.remove();
   styleEl = null;

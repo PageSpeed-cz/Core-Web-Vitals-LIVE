@@ -3,64 +3,6 @@ import type { OptionsState } from '../../lib/types';
 import { DEFAULT_OPTIONS } from '../../lib/types';
 
 const STORAGE_KEY = 'cwv-live-options';
-const LCP_MAX = 4000;
-const INP_MAX = 500;
-const CLS_MAX = 0.25;
-
-interface MetricPayload {
-  value: number;
-  rating: 'good' | 'needs-improvement' | 'poor';
-  label: string;
-}
-
-interface MetricsPayload {
-  LCP?: MetricPayload | null;
-  INP?: MetricPayload | null;
-  CLS?: MetricPayload | null;
-}
-
-function fillPercent(value: number, max: number, invert = false): number {
-  const p = Math.min(100, Math.round((value / max) * 100));
-  return invert ? 100 - p : p;
-}
-
-function renderMetric(
-  name: string,
-  m: MetricPayload | null | undefined,
-  max: number,
-  invert: boolean
-): string {
-  if (!m) {
-    return `
-      <div class="metric unknown" data-metric="${name}">
-        <span class="metric-name">${name}</span>
-        <span class="metric-value">—</span>
-        <div class="metric-bar-wrap"><div class="metric-bar-fill" style="width: 0%"></div></div>
-        <span class="metric-rating">—</span>
-      </div>`;
-  }
-  const rating = m.rating.replace('-', '-');
-  const fill = fillPercent(m.value, max, invert);
-  const ratingLabel =
-    m.rating === 'good'
-      ? 'Good'
-      : m.rating === 'needs-improvement'
-        ? 'Needs work'
-        : 'Poor';
-  return `
-    <div class="metric ${rating}" data-metric="${name}">
-      <span class="metric-name">${name}</span>
-      <span class="metric-value">${m.label}</span>
-      <div class="metric-bar-wrap"><div class="metric-bar-fill" style="width: ${fill}%"></div></div>
-      <span class="metric-rating">${ratingLabel}</span>
-    </div>`;
-}
-
-async function loadMetrics(tabId: number): Promise<MetricsPayload | null> {
-  const data = await browser.storage.local.get('metrics');
-  const metrics = (data.metrics as Record<number, MetricsPayload>) ?? {};
-  return metrics[tabId] ?? null;
-}
 
 async function loadOptions(): Promise<OptionsState> {
   const data = await browser.storage.sync.get(STORAGE_KEY);
@@ -73,33 +15,23 @@ async function saveOptions(options: OptionsState): Promise<void> {
 }
 
 function render(
-  metrics: MetricsPayload | null,
   options: OptionsState,
   throttled: boolean,
-  tabId: number | null
+  tabId: number | null,
+  hasTab: boolean
 ): void {
   const app = document.getElementById('app')!;
-  const hasAny =
-    metrics?.LCP ?? metrics?.INP ?? metrics?.CLS ? true : false;
 
   app.innerHTML = `
     <h1>Core Web Vitals Live</h1>
-    ${
-      hasAny
-        ? `
-    ${renderMetric('LCP', metrics?.LCP ?? null, LCP_MAX, true)}
-    ${renderMetric('INP', metrics?.INP ?? null, INP_MAX, true)}
-    ${renderMetric('CLS', metrics?.CLS ?? null, CLS_MAX, true)}`
-        : `
-    <p class="empty">Open a webpage to see live Core Web Vitals (LCP, INP, CLS).</p>`
-    }
+    <p class="status">${hasTab ? 'is running\u2026' : 'Open a webpage to start'}</p>
 
     <section class="section">
       <label class="toggle-row">
         <input type="checkbox" id="throttle" class="toggle-input" ${throttled ? 'checked' : ''} />
         <span class="toggle-label">Emulate slower device</span>
       </label>
-      <p class="section-desc">4× CPU slowdown + Fast 4G network. A yellow browser bar will appear — this is normal and required for throttling.</p>
+      <p class="section-desc">4\u00d7 CPU slowdown + Fast 4G network. A yellow browser bar will appear \u2014 this is normal and required for throttling.</p>
     </section>
 
     <section class="section">
@@ -163,13 +95,13 @@ async function main(): Promise<void> {
     currentWindow: true,
   });
   const tabId = tab?.id ?? null;
+  const hasTab = tabId != null && !!tab?.url && !tab.url.startsWith('chrome://');
 
   if (tabId != null) {
     browser.tabs.sendMessage(tabId, { type: 'ACTIVATE' }).catch(() => {});
   }
 
-  const [metrics, options, throttlingState] = await Promise.all([
-    tabId != null ? loadMetrics(tabId) : Promise.resolve(null),
+  const [options, throttlingState] = await Promise.all([
     loadOptions(),
     tabId != null
       ? browser.runtime.sendMessage({ type: 'GET_THROTTLING_STATE', tabId })
@@ -178,7 +110,7 @@ async function main(): Promise<void> {
 
   const throttled = (throttlingState as { throttled?: boolean })?.throttled ?? options.throttlingEnabled;
 
-  render(metrics, options, throttled, tabId);
+  render(options, throttled, tabId, hasTab);
 }
 
 main();

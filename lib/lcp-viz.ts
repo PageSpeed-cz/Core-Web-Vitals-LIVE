@@ -1,5 +1,5 @@
 /**
- * Core Web Vitals Live – LCP visualizer: pulsating border and label on the LCP element.
+ * pagespeed.One – LCP visualizer: pulsating border and label on the LCP element.
  */
 
 const PREFIX = 'cwv-live-lcp';
@@ -10,7 +10,7 @@ const STYLES = `
   position: fixed;
   pointer-events: none;
   z-index: ${Z_INDEX};
-  border: 3px solid rgba(66, 133, 244, 0.8);
+  border: 3px solid rgba(255, 0, 170, 0.8);
   border-radius: 6px;
   box-sizing: border-box;
   animation: ${PREFIX}-pulse 2s ease-in-out infinite;
@@ -18,21 +18,23 @@ const STYLES = `
 }
 .${PREFIX}-label {
   position: absolute;
-  top: -24px;
+  top: -26px;
   left: 0;
-  font-family: system-ui, sans-serif;
-  font-size: 11px;
-  font-weight: 700;
+  font-family: 'Special Gothic Expanded One', system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
   color: #fff;
-  background: rgba(66, 133, 244, 0.95);
-  padding: 2px 8px;
+  background: rgba(255, 0, 170, 0.92);
+  padding: 3px 10px;
   border-radius: 4px;
   white-space: nowrap;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 @keyframes ${PREFIX}-pulse {
-  0%, 100% { opacity: 1; box-shadow: 0 0 0 1px rgba(255,255,255,0.3) inset, 0 0 12px rgba(66,133,244,0.4); }
-  50% { opacity: 0.85; box-shadow: 0 0 0 1px rgba(255,255,255,0.3) inset, 0 0 20px rgba(66,133,244,0.6); }
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 1px rgba(255,255,255,0.3) inset, 0 0 12px rgba(255,0,170,0.4); }
+  50% { opacity: 0.85; box-shadow: 0 0 0 1px rgba(255,255,255,0.3) inset, 0 0 24px rgba(255,0,170,0.6); }
 }
 `;
 

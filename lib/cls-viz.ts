@@ -1,11 +1,10 @@
 /**
- * Core Web Vitals Live – CLS visualizer: purple overlays on layout-shifted areas.
+ * pagespeed.One – CLS visualizer: branded overlays on layout-shifted areas.
  */
 
 const PREFIX = 'cwv-live-cls';
 const FADE_MS = 4000;
 const Z_INDEX = 2147483645;
-/** Skip imperceptible layout shifts below this score. */
 const MIN_SHIFT_VALUE = 0.005;
 
 const STYLES = `
@@ -13,8 +12,8 @@ const STYLES = `
   position: fixed;
   pointer-events: none;
   z-index: ${Z_INDEX};
-  background: rgba(138, 43, 226, 0.35);
-  border: 2px solid rgba(138, 43, 226, 0.6);
+  background: rgba(255, 0, 170, 0.25);
+  border: 2px solid rgba(255, 0, 170, 0.55);
   border-radius: 4px;
   box-sizing: border-box;
   transition: opacity ${FADE_MS}ms ease-out;
@@ -27,11 +26,13 @@ const STYLES = `
   opacity: 0;
 }
 .${PREFIX}-label {
-  font-family: system-ui, sans-serif;
-  font-size: 11px;
-  font-weight: 600;
+  font-family: 'Special Gothic Expanded One', system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
   color: #fff;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.4);
 }
 `;
 
