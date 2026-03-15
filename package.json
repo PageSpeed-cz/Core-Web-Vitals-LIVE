@@ -1,0 +1,24 @@
+{
+  "name": "core-web-vitals-live",
+  "description": "See your website's performance. Live. Core Web Vitals (LCP, INP, CLS) overlay and visualizations.",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "wxt",
+    "dev:firefox": "wxt -b firefox",
+    "build": "wxt build",
+    "build:firefox": "wxt build -b firefox",
+    "zip": "wxt zip",
+    "zip:firefox": "wxt zip -b firefox",
+    "compile": "tsc --noEmit",
+    "postinstall": "wxt prepare"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "wxt": "^0.20.18"
+  },
+  "dependencies": {
+    "web-vitals": "^5.1.0"
+  }
+}
