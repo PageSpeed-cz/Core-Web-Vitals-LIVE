@@ -22,19 +22,17 @@ export interface MetricsState {
 }
 
 export interface OptionsState {
-  hudEnabled: boolean;
   clsVizEnabled: boolean;
   inpVizEnabled: boolean;
   lcpVizEnabled: boolean;
-  hudPosition: 'bottom-right' | 'bottom-left' | 'top-right';
+  throttlingEnabled: boolean;
 }
 
 export const DEFAULT_OPTIONS: OptionsState = {
-  hudEnabled: true,
   clsVizEnabled: true,
   inpVizEnabled: true,
   lcpVizEnabled: true,
-  hudPosition: 'bottom-right',
+  throttlingEnabled: false,
 };
 
 /** Thresholds: [good max, poor min] - same as web-vitals */

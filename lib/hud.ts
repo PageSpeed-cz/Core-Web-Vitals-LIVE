@@ -37,7 +37,7 @@ const STYLES = `
   max-width: 280px;
   padding: 10px 12px;
   border-radius: 10px;
-  background: rgba(20, 22, 28, 0.88);
+  background: rgba(20, 22, 28, 0.75);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255,255,255,0.08);
@@ -58,6 +58,10 @@ const STYLES = `
   margin-bottom: 8px;
   padding-bottom: 6px;
   border-bottom: 1px solid rgba(255,255,255,0.1);
+  cursor: grab;
+}
+.${HUD_ID} .${PREFIX}-header:active {
+  cursor: grabbing;
 }
 .${HUD_ID} .${PREFIX}-title {
   color: rgba(255,255,255,0.95);
@@ -137,30 +141,19 @@ const RATING_LABELS: Record<MetricRating, string> = {
   poor: 'Poor',
 };
 
-export type HudPosition = 'bottom-right' | 'bottom-left' | 'top-right';
-
-const POSITION_STYLES: Record<HudPosition, string> = {
-  'bottom-right': 'bottom: 16px; right: 16px;',
-  'bottom-left': 'bottom: 16px; left: 16px;',
-  'top-right': 'top: 16px; right: 16px;',
-};
-
-export interface HUDOptions {
-  position?: HudPosition;
-}
-
 let state: Partial<MetricsState> = {};
 let lastRating: Partial<Record<string, MetricRating>> = {};
 
-export function createHUD(options: HUDOptions = {}): HTMLElement {
-  const position = options.position ?? 'bottom-right';
+const HUD_DEFAULT_STYLE = 'top: 16px; right: 16px;';
+
+export function createHUD(): HTMLElement {
   const existing = document.getElementById(HUD_ID);
   if (existing) return existing;
 
   const wrap = document.createElement('div');
   wrap.id = HUD_ID;
   wrap.className = HUD_ID;
-  wrap.setAttribute('style', POSITION_STYLES[position]);
+  wrap.setAttribute('style', HUD_DEFAULT_STYLE);
 
   const style = document.createElement('style');
   style.textContent = STYLES;
@@ -193,10 +186,37 @@ export function createHUD(options: HUDOptions = {}): HTMLElement {
   wrap.appendChild(bars);
 
   const toggleBtn = header.querySelector(`.${PREFIX}-toggle`) as HTMLButtonElement;
-  toggleBtn?.addEventListener('click', () => {
+  toggleBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
     wrap.classList.toggle(`${PREFIX}-minimized`);
     toggleBtn.textContent = wrap.classList.contains(`${PREFIX}-minimized`) ? '+' : '−';
     toggleBtn.setAttribute('aria-label', wrap.classList.contains(`${PREFIX}-minimized`) ? 'Expand' : 'Minimize');
+  });
+
+  // Drag to move
+  let dragOffsetX = 0;
+  let dragOffsetY = 0;
+  const onMouseMove = (e: MouseEvent) => {
+    const left = e.clientX - dragOffsetX;
+    const top = e.clientY - dragOffsetY;
+    wrap.style.left = `${left}px`;
+    wrap.style.top = `${top}px`;
+    wrap.style.right = 'auto';
+  };
+  const onMouseUp = () => {
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+  };
+  header.addEventListener('mousedown', (e) => {
+    if ((e.target as HTMLElement).closest(`.${PREFIX}-toggle`)) return;
+    const rect = wrap.getBoundingClientRect();
+    dragOffsetX = e.clientX - rect.left;
+    dragOffsetY = e.clientY - rect.top;
+    wrap.style.left = `${rect.left}px`;
+    wrap.style.top = `${rect.top}px`;
+    wrap.style.right = 'auto';
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
   });
 
   document.body.appendChild(wrap);
@@ -250,10 +270,6 @@ export function updateHUD(
       setTimeout(() => row.classList.remove(`${PREFIX}-worsen`), 400);
     }
   }
-}
-
-export function setHUDPosition(root: HTMLElement, position: HudPosition): void {
-  root.setAttribute('style', POSITION_STYLES[position]);
 }
 
 export function destroyHUD(): void {

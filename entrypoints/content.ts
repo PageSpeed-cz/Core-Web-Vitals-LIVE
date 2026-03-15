@@ -1,17 +1,13 @@
 /**
  * Core Web Vitals Live – content script: metrics, HUD, CLS/INP/LCP visualizers.
+ * Passive by default (metrics + badge only). HUD and visualizations activate on ACTIVATE message.
  */
 
 import { initMetrics, formatLCP, formatINP, formatCLS, formatFCP, formatTTFB } from '../lib/metrics';
 import type { Metric } from '../lib/metrics';
 import type { MetricsState, MetricState, OptionsState } from '../lib/types';
 import { DEFAULT_OPTIONS } from '../lib/types';
-import {
-  createHUD,
-  updateHUD,
-  setHUDPosition,
-  type HudPosition,
-} from '../lib/hud';
+import { createHUD, updateHUD } from '../lib/hud';
 import { initCLSViz } from '../lib/cls-viz';
 import { initINPViz } from '../lib/inp-viz';
 import { showLCPElement, destroyLCPViz } from '../lib/lcp-viz';
@@ -38,16 +34,17 @@ export default defineContentScript({
   matches: ['<all_urls>'],
   main() {
     let options: OptionsState = { ...DEFAULT_OPTIONS };
+    let activated = false;
     let hudRoot: HTMLElement | null = null;
     let teardownCLS: (() => void) | null = null;
     let teardownINP: (() => void) | null = null;
+    let lastLCPElement: Element | null = null;
     const currentMetrics: Partial<MetricsState> = {};
 
     function applyOptions(next: OptionsState) {
       options = next;
-      if (hudRoot) {
-        setHUDPosition(hudRoot, options.hudPosition as HudPosition);
-      }
+      if (!activated) return;
+
       if (!options.clsVizEnabled && teardownCLS) {
         teardownCLS();
         teardownCLS = null;
@@ -62,7 +59,23 @@ export default defineContentScript({
       }
       if (!options.lcpVizEnabled) {
         destroyLCPViz();
+      } else if (options.lcpVizEnabled && lastLCPElement) {
+        showLCPElement(lastLCPElement);
       }
+    }
+
+    function ensureHUD() {
+      if (!hudRoot) {
+        hudRoot = createHUD();
+        updateHUD(hudRoot, currentMetrics);
+      }
+    }
+
+    function activate() {
+      if (activated) return;
+      activated = true;
+      ensureHUD();
+      applyOptions(options);
     }
 
     function sendToBackground(metrics: Partial<MetricsState>) {
@@ -82,9 +95,12 @@ export default defineContentScript({
         case 'LCP':
           state = metricToState(metric, formatLCP);
           currentMetrics.LCP = state;
-          if (options.lcpVizEnabled && metric.entries?.length) {
+          if (metric.entries?.length) {
             const last = metric.entries[metric.entries.length - 1] as PerformanceEntry & { element?: Element | null };
-            if (last?.element) showLCPElement(last.element);
+            if (last?.element) lastLCPElement = last.element;
+          }
+          if (activated && options.lcpVizEnabled && lastLCPElement) {
+            showLCPElement(lastLCPElement);
           }
           break;
         case 'INP':
@@ -104,7 +120,7 @@ export default defineContentScript({
           currentMetrics.TTFB = state;
           break;
       }
-      if (options.hudEnabled && hudRoot && state && ['LCP', 'INP', 'CLS'].includes(name)) {
+      if (hudRoot && state && ['LCP', 'INP', 'CLS'].includes(name)) {
         updateHUD(hudRoot, { [name]: state });
       }
       if (['LCP', 'INP', 'CLS'].includes(name)) {
@@ -112,14 +128,8 @@ export default defineContentScript({
       }
     }
 
+    // Passive init: only metrics (for badge)
     function init() {
-      if (options.hudEnabled) {
-        hudRoot = createHUD({ position: options.hudPosition as HudPosition });
-        updateHUD(hudRoot, currentMetrics);
-      }
-      if (options.clsVizEnabled) teardownCLS = initCLSViz();
-      if (options.inpVizEnabled) teardownINP = initINPViz();
-
       initMetrics({
         onLCP: (m) => onMetric('LCP', m),
         onINP: (m) => onMetric('INP', m),
@@ -131,22 +141,25 @@ export default defineContentScript({
 
     browser.storage.sync.get(STORAGE_KEY).then((data) => {
       const stored = data[STORAGE_KEY];
-      if (stored) applyOptions({ ...DEFAULT_OPTIONS, ...stored });
+      if (stored) options = { ...DEFAULT_OPTIONS, ...stored };
       init();
     });
 
     browser.storage.onChanged.addListener((changes, areaName) => {
       if (areaName === 'sync' && changes[STORAGE_KEY]) {
         const next = (changes[STORAGE_KEY].newValue ?? {}) as Partial<OptionsState>;
-        applyOptions({ ...options, ...next });
-        if (options.hudEnabled && !hudRoot) {
-          hudRoot = createHUD({ position: options.hudPosition as HudPosition });
-          updateHUD(hudRoot, currentMetrics);
-        } else if (!options.hudEnabled && hudRoot) {
-          hudRoot.remove();
-          hudRoot = null;
-        }
+        options = { ...options, ...next };
+        applyOptions(options);
       }
     });
+
+    browser.runtime.onMessage.addListener(
+      (message: { type?: string }, _sender, sendResponse) => {
+        if (message.type === 'ACTIVATE') {
+          activate();
+          sendResponse({ ok: true });
+        }
+      }
+    );
   },
 });
