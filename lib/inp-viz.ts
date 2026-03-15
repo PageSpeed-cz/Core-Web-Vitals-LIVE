@@ -1,5 +1,6 @@
 /**
- * pagespeed.One – INP visualizer: cursor/target badge for slow interactions (>50ms).
+ * pagespeed.One – INP visualizer: hatched bounding-box overlay on the interacted element for slow interactions (>50ms).
+ * Falls back to a pointer-anchored badge when no element bounding rect is available.
  */
 
 const PREFIX = 'cwv-live-inp';
@@ -8,46 +9,75 @@ const DISMISS_MS = 1800;
 const CLEANUP_DELAY_MS = 10_000;
 const Z_INDEX = 2147483645;
 
+const INP_GOOD_MS = 200;
+const INP_POOR_MS = 500;
+
+function inpColor(ms: number): string {
+  if (ms <= INP_GOOD_MS) return '#0CCE6B';
+  if (ms <= INP_POOR_MS) return '#FFA400';
+  return '#FF4E42';
+}
+
+function makeLabelHTML(valueText: string, valueColor: string): string {
+  return `INP: <span style="font-family:'Mona Sans',system-ui,sans-serif;font-weight:600;font-variant-numeric:tabular-nums;color:${valueColor}">${valueText}</span>`;
+}
+
+const HATCH = 'rgba(255, 0, 170, 0.5)';
+
 const STYLES = `
+.${PREFIX}-overlay {
+  position: fixed;
+  pointer-events: none;
+  z-index: ${Z_INDEX};
+  border: 3px solid rgba(255, 0, 170, 0.8);
+  border-radius: 4px;
+  box-sizing: border-box;
+  background-image: repeating-linear-gradient(
+    45deg,
+    ${HATCH} 0px,
+    ${HATCH} 3px,
+    transparent 3px,
+    transparent 12px
+  );
+  transition: opacity 0.25s ease;
+}
+.${PREFIX}-overlay.${PREFIX}-fade {
+  opacity: 0;
+}
 .${PREFIX}-badge {
   position: fixed;
   pointer-events: none;
   z-index: ${Z_INDEX};
-  padding: 4px 10px;
-  border-radius: 6px;
+  transform: translate(-50%, calc(-100% - 8px));
+}
+.${PREFIX}-badge.${PREFIX}-fade {
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.${PREFIX}-label {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 4px;
   font-family: 'Special Gothic Expanded One', system-ui, sans-serif;
   font-size: 12px;
   font-weight: 400;
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  color: #fff;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(16, 16, 36, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 8px 20px;
+  border-radius: 4px;
   white-space: nowrap;
-  box-sizing: border-box;
-  animation: ${PREFIX}-pop 0.2s ease;
-  transform: translate(-50%, -100%);
-  margin-top: -8px;
 }
-.${PREFIX}-badge.${PREFIX}-amber {
-  background: #FFA400;
-  border: 1px solid rgba(0,0,0,0.15);
-}
-.${PREFIX}-badge.${PREFIX}-red {
-  background: #FF00AA;
-  border: 1px solid rgba(0,0,0,0.15);
-  animation: ${PREFIX}-pop 0.2s ease, ${PREFIX}-pulse 0.6s ease 0.2s 2;
-}
-@keyframes ${PREFIX}-pop {
-  from { opacity: 0; transform: translate(-50%, -100%) scale(0.9); }
-  to { opacity: 1; transform: translate(-50%, -100%) scale(1); }
-}
-@keyframes ${PREFIX}-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 0, 170, 0.4); }
-  50% { box-shadow: 0 0 0 6px rgba(255, 0, 170, 0); }
-}
-.${PREFIX}-badge.${PREFIX}-fade {
-  opacity: 0;
-  transition: opacity 0.25s ease;
+.${PREFIX}-badge .${PREFIX}-label {
+  position: static;
+  transform: none;
+  display: block;
 }
 `;
 
@@ -87,20 +117,46 @@ function trackPointer(): void {
   document.addEventListener('click', updatePointer, { passive: true });
 }
 
-function showBadge(duration: number, x: number, y: number): void {
-  ensureStyles();
-  const isPoor = duration > 200;
-  const el = document.createElement('div');
-  el.className = `${PREFIX}-badge ${isPoor ? `${PREFIX}-red` : `${PREFIX}-amber`}`;
-  el.textContent = `${Math.round(duration)} ms`;
-  el.style.left = `${x}px`;
-  el.style.top = `${y}px`;
-  document.body.appendChild(el);
-
+function fadeAndRemove(el: HTMLElement): void {
   setTimeout(() => {
     el.classList.add(`${PREFIX}-fade`);
     setTimeout(() => el.remove(), 280);
   }, DISMISS_MS);
+}
+
+function showOverlay(duration: number, target: Element | null): void {
+  ensureStyles();
+  const color = inpColor(duration);
+  const labelHTML = makeLabelHTML(`${Math.round(duration)}ms`, color);
+
+  if (target) {
+    try {
+      const rect = target.getBoundingClientRect();
+      if (rect.width > 0 || rect.height > 0) {
+        const el = document.createElement('div');
+        el.className = `${PREFIX}-overlay`;
+        el.style.left = `${rect.left}px`;
+        el.style.top = `${rect.top}px`;
+        el.style.width = `${rect.width}px`;
+        el.style.height = `${rect.height}px`;
+        el.innerHTML = `<span class="${PREFIX}-label">${labelHTML}</span>`;
+        document.body.appendChild(el);
+        fadeAndRemove(el);
+        return;
+      }
+    } catch {
+      // fall through to pointer fallback
+    }
+  }
+
+  // Fallback: floating badge anchored to last pointer position
+  const badge = document.createElement('div');
+  badge.className = `${PREFIX}-badge`;
+  badge.style.left = `${lastPointerX}px`;
+  badge.style.top = `${lastPointerY}px`;
+  badge.innerHTML = `<span class="${PREFIX}-label">${labelHTML}</span>`;
+  document.body.appendChild(badge);
+  fadeAndRemove(badge);
 }
 
 export function initINPViz(): () => void {
@@ -111,10 +167,7 @@ export function initINPViz(): () => void {
   inpVizCleanupTimer = null;
 
   const observer = new PerformanceObserver((list) => {
-    const bestPerInteraction = new Map<
-      number,
-      { duration: number; x: number; y: number }
-    >();
+    const bestPerInteraction = new Map<number, { duration: number; target: Element | null }>();
     const seen = inpVizSeenInteractions!;
 
     for (const entry of list.getEntries()) {
@@ -123,31 +176,17 @@ export function initINPViz(): () => void {
       if (!e.interactionId) continue;
       if (seen.has(e.interactionId)) continue;
 
-      let x = lastPointerX;
-      let y = lastPointerY;
-      if (e.target && e.target instanceof Element) {
-        try {
-          const rect = e.target.getBoundingClientRect();
-          x = rect.left + rect.width / 2;
-          y = rect.top;
-        } catch {
-          // use last pointer if getBoundingClientRect fails
-        }
-      }
+      const target = e.target instanceof Element ? e.target : null;
 
       const existing = bestPerInteraction.get(e.interactionId);
       if (!existing || e.duration > existing.duration) {
-        bestPerInteraction.set(e.interactionId, {
-          duration: e.duration,
-          x,
-          y,
-        });
+        bestPerInteraction.set(e.interactionId, { duration: e.duration, target });
       }
     }
 
-    for (const [id, { duration, x, y }] of bestPerInteraction) {
+    for (const [id, { duration, target }] of bestPerInteraction) {
       seen.add(id);
-      showBadge(duration, x, y);
+      showOverlay(duration, target);
     }
 
     if (!inpVizCleanupTimer) {
@@ -179,7 +218,7 @@ export function destroyINPViz(): void {
   if (inpVizCleanupTimer) clearTimeout(inpVizCleanupTimer);
   inpVizCleanupTimer = null;
   inpVizSeenInteractions?.clear();
-  document.querySelectorAll(`.${PREFIX}-badge`).forEach((el) => el.remove());
+  document.querySelectorAll(`.${PREFIX}-overlay, .${PREFIX}-badge`).forEach((el) => el.remove());
   styleEl?.remove();
   styleEl = null;
 }

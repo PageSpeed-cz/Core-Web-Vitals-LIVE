@@ -5,6 +5,24 @@
 const PREFIX = 'cwv-live-lcp';
 const Z_INDEX = 2147483644;
 
+const LCP_GOOD_MS = 2500;
+const LCP_POOR_MS = 4000;
+
+function lcpColor(ms: number): string {
+  if (ms <= LCP_GOOD_MS) return '#0CCE6B';
+  if (ms <= LCP_POOR_MS) return '#FFA400';
+  return '#FF4E42';
+}
+
+function formatLCPMs(ms: number): string {
+  if (ms < 1000) return `${Math.round(ms)}ms`;
+  return `${(ms / 1000).toFixed(1)}s`;
+}
+
+function makeLabelHTML(prefix: string, valueText: string, valueColor: string): string {
+  return `${prefix}: <span style="font-family:'Mona Sans',system-ui,sans-serif;font-weight:600;font-variant-numeric:tabular-nums;color:${valueColor}">${valueText}</span>`;
+}
+
 const STYLES = `
 .${PREFIX}-overlay {
   position: fixed;
@@ -18,19 +36,23 @@ const STYLES = `
 }
 .${PREFIX}-label {
   position: absolute;
-  top: -26px;
-  left: 0;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 4px;
   font-family: 'Special Gothic Expanded One', system-ui, sans-serif;
   font-size: 12px;
   font-weight: 400;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: #fff;
-  background: rgba(255, 0, 170, 0.92);
-  padding: 3px 10px;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(16, 16, 36, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 6px 20px;
   border-radius: 4px;
   white-space: nowrap;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 @keyframes ${PREFIX}-pulse {
   0%, 100% { opacity: 1; box-shadow: 0 0 0 1px rgba(255,255,255,0.3) inset, 0 0 12px rgba(255,0,170,0.4); }
@@ -73,7 +95,7 @@ function scheduleUpdate(): void {
   updateRaf = requestAnimationFrame(tick);
 }
 
-export function showLCPElement(element: Element | null): void {
+export function showLCPElement(element: Element | null, lcpMs?: number): void {
   ensureStyles();
   if (!element) {
     hideLCPElement();
@@ -86,9 +108,15 @@ export function showLCPElement(element: Element | null): void {
     overlayEl = null;
   }
 
+  const valueText = lcpMs != null ? formatLCPMs(lcpMs) : '';
+  const valueColor = lcpMs != null ? lcpColor(lcpMs) : '#ffffff';
+  const labelInner = lcpMs != null
+    ? makeLabelHTML('LCP Element', valueText, valueColor)
+    : 'LCP Element';
+
   overlayEl = document.createElement('div');
   overlayEl.className = `${PREFIX}-overlay`;
-  overlayEl.innerHTML = `<span class="${PREFIX}-label">LCP element</span>`;
+  overlayEl.innerHTML = `<span class="${PREFIX}-label">${labelInner}</span>`;
   document.body.appendChild(overlayEl);
 
   updatePosition();

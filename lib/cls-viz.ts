@@ -7,6 +7,19 @@ const FADE_MS = 4000;
 const Z_INDEX = 2147483645;
 const MIN_SHIFT_VALUE = 0.005;
 
+const CLS_GOOD = 0.1;
+const CLS_POOR = 0.25;
+
+function clsColor(value: number): string {
+  if (value <= CLS_GOOD) return '#0CCE6B';
+  if (value <= CLS_POOR) return '#FFA400';
+  return '#FF4E42';
+}
+
+function makeLabelHTML(prefix: string, valueText: string, valueColor: string): string {
+  return `${prefix}: <span style="font-family:'Mona Sans',system-ui,sans-serif;font-weight:600;font-variant-numeric:tabular-nums;color:${valueColor}">${valueText}</span>`;
+}
+
 const STYLES = `
 .${PREFIX}-overlay {
   position: fixed;
@@ -17,22 +30,29 @@ const STYLES = `
   border-radius: 4px;
   box-sizing: border-box;
   transition: opacity ${FADE_MS}ms ease-out;
-  display: flex;
-  align-items: flex-end;
-  justify-content: flex-start;
-  padding: 4px 6px;
 }
 .${PREFIX}-overlay.${PREFIX}-fade {
   opacity: 0;
 }
 .${PREFIX}-label {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 4px;
   font-family: 'Special Gothic Expanded One', system-ui, sans-serif;
   font-size: 12px;
   font-weight: 400;
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  color: #fff;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(16, 16, 36, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 8px 12px;
+  border-radius: 4px;
+  white-space: nowrap;
 }
 `;
 
@@ -76,7 +96,8 @@ export function initCLSViz(): () => void {
 
 function showCLSOverlay(entry: LayoutShiftEntry): void {
   const value = entry.value;
-  const label = `CLS +${value.toFixed(2)}`;
+  const color = clsColor(value);
+  const labelInner = makeLabelHTML('CLS', `+${value.toFixed(2)}`, color);
   const sources = entry.sources ?? [];
 
   if (sources.length === 0) return;
@@ -91,7 +112,7 @@ function showCLSOverlay(entry: LayoutShiftEntry): void {
     el.style.top = `${rect.top}px`;
     el.style.width = `${rect.width}px`;
     el.style.height = `${rect.height}px`;
-    el.innerHTML = `<span class="${PREFIX}-label">${label}</span>`;
+    el.innerHTML = `<span class="${PREFIX}-label">${labelInner}</span>`;
     document.body.appendChild(el);
 
     requestAnimationFrame(() => {

@@ -60,7 +60,7 @@ export default defineContentScript({
       if (!options.lcpVizEnabled) {
         destroyLCPViz();
       } else if (options.lcpVizEnabled && lastLCPElement) {
-        showLCPElement(lastLCPElement);
+        showLCPElement(lastLCPElement, currentMetrics.LCP?.value);
       }
     }
 
@@ -119,7 +119,7 @@ export default defineContentScript({
             if (last?.element) lastLCPElement = last.element;
           }
           if (activated && options.lcpVizEnabled && lastLCPElement) {
-            showLCPElement(lastLCPElement);
+            showLCPElement(lastLCPElement, state.value);
           }
           break;
         case 'INP':
