@@ -1,13 +1,14 @@
 /**
- * pagespeed.One – INP visualizer: hatched bounding-box overlay on the interacted element for slow interactions (>50ms).
- * Falls back to a pointer-anchored badge when no element bounding rect is available.
+ * pagespeed.One – INP visualizer: hatched bounding-box overlay on the interacted element.
+ * Shows for all interactions (≥16ms API minimum).
+ * Fallback chain: PerformanceEventTiming.target → lastKeyTarget (active element on keydown) → pointer badge.
  */
 
 const PREFIX = 'cwv-live-inp';
-const DURATION_THRESHOLD_MS = 50;
 const DISMISS_MS = 1800;
 const CLEANUP_DELAY_MS = 10_000;
-const Z_INDEX = 2147483645;
+// CSS max z-index – stays above modal dialogs and other high-z-index overlays
+const Z_INDEX = 2147483647;
 
 const INP_GOOD_MS = 200;
 const INP_POOR_MS = 500;
@@ -19,10 +20,11 @@ function inpColor(ms: number): string {
 }
 
 function makeLabelHTML(valueText: string, valueColor: string): string {
-  return `INP: <span style="font-family:'Mona Sans',system-ui,sans-serif;font-weight:600;font-variant-numeric:tabular-nums;color:${valueColor}">${valueText}</span>`;
+  return `INP: <span style="font-family:'Mona Sans',system-ui,sans-serif;font-weight:600;font-variant-numeric:tabular-nums;text-transform:none;color:${valueColor}">${valueText}</span>`;
 }
 
-const HATCH = 'rgba(255, 0, 170, 0.5)';
+// 25% opacity, 3px stripe / 6px period → 50% area coverage
+const HATCH = 'rgba(255, 0, 170, 0.25)';
 
 const STYLES = `
 .${PREFIX}-overlay {
@@ -37,7 +39,7 @@ const STYLES = `
     ${HATCH} 0px,
     ${HATCH} 3px,
     transparent 3px,
-    transparent 12px
+    transparent 6px
   );
   transition: opacity 0.25s ease;
 }
@@ -98,12 +100,13 @@ interface EventTimingEntry extends PerformanceEntry {
 
 let lastPointerX = 0;
 let lastPointerY = 0;
+let lastKeyTarget: Element | null = null;
 
 let inpVizSeenInteractions: Set<number> | null = null;
 let inpVizCleanupTimer: ReturnType<typeof setTimeout> | null = null;
 
 function trackPointer(): void {
-  const updatePointer = (e: MouseEvent | TouchEvent) => {
+  const update = (e: MouseEvent | TouchEvent) => {
     if ('touches' in e && e.touches.length) {
       lastPointerX = e.touches[0].clientX;
       lastPointerY = e.touches[0].clientY;
@@ -112,9 +115,18 @@ function trackPointer(): void {
       lastPointerY = e.clientY;
     }
   };
-  document.addEventListener('mousemove', updatePointer, { passive: true });
-  document.addEventListener('touchmove', updatePointer, { passive: true });
-  document.addEventListener('click', updatePointer, { passive: true });
+  document.addEventListener('mousemove', update, { passive: true });
+  document.addEventListener('touchmove', update, { passive: true });
+  document.addEventListener('click', update, { passive: true });
+}
+
+function trackKeyboard(): void {
+  document.addEventListener('keydown', () => {
+    const active = document.activeElement;
+    if (active && active !== document.body && active !== document.documentElement) {
+      lastKeyTarget = active;
+    }
+  }, { passive: true, capture: true });
 }
 
 function fadeAndRemove(el: HTMLElement): void {
@@ -124,44 +136,61 @@ function fadeAndRemove(el: HTMLElement): void {
   }, DISMISS_MS);
 }
 
+function isInsideHUD(el: Element): boolean {
+  return !!el.closest('#cwv-live-hud');
+}
+
+function tryShowBox(labelHTML: string, element: Element): boolean {
+  try {
+    const rect = element.getBoundingClientRect();
+    if (rect.width > 0 || rect.height > 0) {
+      const el = document.createElement('div');
+      el.className = `${PREFIX}-overlay`;
+      el.style.left = `${rect.left}px`;
+      el.style.top = `${rect.top}px`;
+      el.style.width = `${rect.width}px`;
+      el.style.height = `${rect.height}px`;
+      el.innerHTML = `<span class="${PREFIX}-label">${labelHTML}</span>`;
+      // Append to documentElement to escape body stacking context and stay above modals
+      document.documentElement.appendChild(el);
+      fadeAndRemove(el);
+      return true;
+    }
+  } catch {
+    // ignore
+  }
+  return false;
+}
+
 function showOverlay(duration: number, target: Element | null): void {
+  // Skip interactions on the extension's own HUD
+  if (target && isInsideHUD(target)) return;
+
   ensureStyles();
   const color = inpColor(duration);
   const labelHTML = makeLabelHTML(`${Math.round(duration)}ms`, color);
 
-  if (target) {
-    try {
-      const rect = target.getBoundingClientRect();
-      if (rect.width > 0 || rect.height > 0) {
-        const el = document.createElement('div');
-        el.className = `${PREFIX}-overlay`;
-        el.style.left = `${rect.left}px`;
-        el.style.top = `${rect.top}px`;
-        el.style.width = `${rect.width}px`;
-        el.style.height = `${rect.height}px`;
-        el.innerHTML = `<span class="${PREFIX}-label">${labelHTML}</span>`;
-        document.body.appendChild(el);
-        fadeAndRemove(el);
-        return;
-      }
-    } catch {
-      // fall through to pointer fallback
-    }
-  }
+  // 1st: element reported by PerformanceEventTiming
+  if (target && tryShowBox(labelHTML, target)) return;
 
-  // Fallback: floating badge anchored to last pointer position
+  // 2nd: last focused element captured at keydown time (for keyboard interactions
+  //      where PerformanceEventTiming.target may be null or already detached)
+  if (lastKeyTarget && lastKeyTarget.isConnected && !isInsideHUD(lastKeyTarget) && tryShowBox(labelHTML, lastKeyTarget)) return;
+
+  // 3rd: pointer-anchored badge fallback
   const badge = document.createElement('div');
   badge.className = `${PREFIX}-badge`;
   badge.style.left = `${lastPointerX}px`;
   badge.style.top = `${lastPointerY}px`;
   badge.innerHTML = `<span class="${PREFIX}-label">${labelHTML}</span>`;
-  document.body.appendChild(badge);
+  document.documentElement.appendChild(badge);
   fadeAndRemove(badge);
 }
 
 export function initINPViz(): () => void {
   ensureStyles();
   trackPointer();
+  trackKeyboard();
 
   inpVizSeenInteractions = new Set<number>();
   inpVizCleanupTimer = null;
@@ -172,7 +201,6 @@ export function initINPViz(): () => void {
 
     for (const entry of list.getEntries()) {
       const e = entry as EventTimingEntry;
-      if (e.duration < DURATION_THRESHOLD_MS) continue;
       if (!e.interactionId) continue;
       if (seen.has(e.interactionId)) continue;
 
@@ -198,10 +226,8 @@ export function initINPViz(): () => void {
   });
 
   try {
-    observer.observe({
-      type: 'event',
-      durationThreshold: DURATION_THRESHOLD_MS,
-    });
+    // 16ms is the API minimum – shows all measurable interactions
+    observer.observe({ type: 'event', durationThreshold: 16 });
   } catch {
     observer.observe({ type: 'event' });
   }

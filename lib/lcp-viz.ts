@@ -20,7 +20,7 @@ function formatLCPMs(ms: number): string {
 }
 
 function makeLabelHTML(prefix: string, valueText: string, valueColor: string): string {
-  return `${prefix}: <span style="font-family:'Mona Sans',system-ui,sans-serif;font-weight:600;font-variant-numeric:tabular-nums;color:${valueColor}">${valueText}</span>`;
+  return `${prefix}: <span style="font-family:'Mona Sans',system-ui,sans-serif;font-weight:600;font-variant-numeric:tabular-nums;text-transform:none;color:${valueColor}">${valueText}</span>`;
 }
 
 const STYLES = `
