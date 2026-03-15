@@ -57,6 +57,8 @@ const LATENCY_MS = 60;
 const CPU_THROTTLE_RATE = 4;
 
 const throttledTabs = new Set<number>();
+/** Tabs where the overlay (HUD + viz) is active; survives page reload until tab close or user turn off */
+const activeOverlayTabs = new Set<number>();
 
 async function enableThrottling(tabId: number): Promise<{ ok: boolean; error?: string }> {
   try {
@@ -148,6 +150,36 @@ export default defineBackground(() => {
         return;
       }
 
+      if (message.type === 'IS_TAB_ACTIVE' && message.tabId != null) {
+        sendResponse?.({ active: activeOverlayTabs.has(message.tabId) });
+        return;
+      }
+
+      if (message.type === 'ACTIVATE_FOR_TAB' && message.tabId != null) {
+        const tabId = message.tabId;
+        activeOverlayTabs.add(tabId);
+        browser.tabs.sendMessage(tabId, { type: 'ACTIVATE' }).catch(() => {});
+        sendResponse?.({ active: true });
+        return;
+      }
+
+      if (message.type === 'DEACTIVATE_FOR_TAB' && message.tabId != null) {
+        const tabId = message.tabId;
+        activeOverlayTabs.delete(tabId);
+        browser.tabs.sendMessage(tabId, { type: 'DEACTIVATE' }).catch(() => {});
+        sendResponse?.({ ok: true });
+        return;
+      }
+
+      if (message.type === 'CONTENT_READY') {
+        const tabId = sender.tab?.id;
+        if (tabId != null && activeOverlayTabs.has(tabId)) {
+          browser.tabs.sendMessage(tabId, { type: 'ACTIVATE' }).catch(() => {});
+        }
+        sendResponse?.({ ok: true });
+        return;
+      }
+
       sendResponse?.({ ok: false });
     }
   );
@@ -158,5 +190,6 @@ export default defineBackground(() => {
 
   browser.tabs.onRemoved.addListener((tabId) => {
     throttledTabs.delete(tabId);
+    activeOverlayTabs.delete(tabId);
   });
 });

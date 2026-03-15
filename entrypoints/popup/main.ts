@@ -18,13 +18,22 @@ function render(
   options: OptionsState,
   throttled: boolean,
   tabId: number | null,
-  hasTab: boolean
+  hasTab: boolean,
+  isActive: boolean,
+  onTurnOff: () => void
 ): void {
   const app = document.getElementById('app')!;
 
+  const statusHtml =
+    !hasTab
+      ? 'Open a webpage to start'
+      : isActive
+        ? 'is running… <button type="button" id="turn-off" class="btn-turn-off">Turn off</button>'
+        : 'Stopped. Open popup on a tab to start.';
+
   app.innerHTML = `
     <h1>Core Web Vitals Live</h1>
-    <p class="status">${hasTab ? 'is running\u2026' : 'Open a webpage to start'}</p>
+    <p class="status">${statusHtml}</p>
 
     <section class="section">
       <label class="toggle-row">
@@ -87,6 +96,11 @@ function render(
   (document.getElementById('cls') as HTMLInputElement).addEventListener('change', onVizChange);
   (document.getElementById('inp') as HTMLInputElement).addEventListener('change', onVizChange);
   (document.getElementById('lcp') as HTMLInputElement).addEventListener('change', onVizChange);
+
+  const turnOffEl = document.getElementById('turn-off');
+  if (turnOffEl) {
+    turnOffEl.addEventListener('click', onTurnOff);
+  }
 }
 
 async function main(): Promise<void> {
@@ -97,8 +111,14 @@ async function main(): Promise<void> {
   const tabId = tab?.id ?? null;
   const hasTab = tabId != null && !!tab?.url && !tab.url.startsWith('chrome://');
 
+  let isActive = false;
   if (tabId != null) {
-    browser.tabs.sendMessage(tabId, { type: 'ACTIVATE' }).catch(() => {});
+    const activeRes = await browser.runtime.sendMessage({ type: 'IS_TAB_ACTIVE', tabId }).catch(() => ({}));
+    isActive = (activeRes as { active?: boolean })?.active === true;
+    if (hasTab && !isActive) {
+      await browser.runtime.sendMessage({ type: 'ACTIVATE_FOR_TAB', tabId }).catch(() => ({}));
+      isActive = true;
+    }
   }
 
   const [options, throttlingState] = await Promise.all([
@@ -110,7 +130,14 @@ async function main(): Promise<void> {
 
   const throttled = (throttlingState as { throttled?: boolean })?.throttled ?? options.throttlingEnabled;
 
-  render(options, throttled, tabId, hasTab);
+  function handleTurnOff() {
+    if (tabId == null) return;
+    browser.runtime.sendMessage({ type: 'DEACTIVATE_FOR_TAB', tabId }).then(() => {
+      render(options, throttled, tabId, hasTab, false, handleTurnOff);
+    });
+  }
+
+  render(options, throttled, tabId, hasTab, isActive, handleTurnOff);
 }
 
 main();

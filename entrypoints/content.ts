@@ -7,9 +7,9 @@ import { initMetrics, formatLCP, formatINP, formatCLS, formatFCP, formatTTFB } f
 import type { Metric } from '../lib/metrics';
 import type { MetricsState, MetricState, OptionsState } from '../lib/types';
 import { DEFAULT_OPTIONS } from '../lib/types';
-import { createHUD, updateHUD } from '../lib/hud';
-import { initCLSViz } from '../lib/cls-viz';
-import { initINPViz } from '../lib/inp-viz';
+import { createHUD, updateHUD, destroyHUD } from '../lib/hud';
+import { initCLSViz, destroyCLSViz } from '../lib/cls-viz';
+import { initINPViz, destroyINPViz } from '../lib/inp-viz';
 import { showLCPElement, destroyLCPViz } from '../lib/lcp-viz';
 
 const STORAGE_KEY = 'cwv-live-options';
@@ -78,6 +78,25 @@ export default defineContentScript({
       applyOptions(options);
     }
 
+    function deactivate() {
+      if (!activated) return;
+      activated = false;
+      if (teardownCLS) {
+        teardownCLS();
+        teardownCLS = null;
+      }
+      if (teardownINP) {
+        teardownINP();
+        teardownINP = null;
+      }
+      destroyLCPViz();
+      destroyCLSViz();
+      destroyINPViz();
+      destroyHUD();
+      hudRoot = null;
+      lastLCPElement = null;
+    }
+
     function sendToBackground(metrics: Partial<MetricsState>) {
       const payload: Record<string, { value: number; rating: string; label: string; badgeLabel?: string } | null> = {};
       for (const k of ['LCP', 'INP', 'CLS'] as const) {
@@ -143,6 +162,7 @@ export default defineContentScript({
       const stored = data[STORAGE_KEY];
       if (stored) options = { ...DEFAULT_OPTIONS, ...stored };
       init();
+      browser.runtime.sendMessage({ type: 'CONTENT_READY' }).catch(() => {});
     });
 
     browser.storage.onChanged.addListener((changes, areaName) => {
@@ -157,6 +177,9 @@ export default defineContentScript({
       (message: { type?: string }, _sender, sendResponse) => {
         if (message.type === 'ACTIVATE') {
           activate();
+          sendResponse({ ok: true });
+        } else if (message.type === 'DEACTIVATE') {
+          deactivate();
           sendResponse({ ok: true });
         }
       }
