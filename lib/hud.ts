@@ -76,14 +76,14 @@ const STYLES = `
   max-width: 340px;
   padding: 14px 18px;
   border-radius: 16px;
-  background: rgba(220, 222, 232, 0.42);
+  background: rgba(16, 16, 36, 0.78);
   backdrop-filter: blur(24px) saturate(1.5);
   -webkit-backdrop-filter: blur(24px) saturate(1.5);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
   user-select: none;
   pointer-events: auto;
-  color: #1a1a3e;
+  color: rgba(255, 255, 255, 0.95);
   transition: transform 0.2s ease, opacity 0.2s ease;
 }
 .${HUD_ID}.${PREFIX}-minimized {
@@ -98,7 +98,7 @@ const STYLES = `
   justify-content: space-between;
   margin-bottom: 12px;
   padding-bottom: 8px;
-  border-bottom: 1px solid rgba(26, 26, 62, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   cursor: grab;
 }
 .${HUD_ID} .${PREFIX}-header:active { cursor: grabbing; }
@@ -108,13 +108,13 @@ const STYLES = `
   font-weight: 400;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: rgba(26, 26, 62, 0.6);
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .${HUD_ID} .${PREFIX}-toggle {
   background: none;
   border: none;
-  color: rgba(26, 26, 62, 0.35);
+  color: rgba(255, 255, 255, 0.4);
   cursor: pointer;
   padding: 2px 6px;
   font-size: 16px;
@@ -123,8 +123,8 @@ const STYLES = `
   font-family: system-ui, sans-serif;
 }
 .${HUD_ID} .${PREFIX}-toggle:hover {
-  color: rgba(26, 26, 62, 0.8);
-  background: rgba(0, 0, 0, 0.06);
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .${HUD_ID} .${PREFIX}-row {
@@ -144,7 +144,7 @@ const STYLES = `
   font-weight: 400;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: #1a1a3e;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .${HUD_ID} .${PREFIX}-value {
