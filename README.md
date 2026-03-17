@@ -4,7 +4,7 @@
 
 A Chrome (and Chromium) extension that shows real-time [Core Web Vitals](https://web.dev/vitals/) (LCP, INP, CLS) on any page, with a game-like HUD and visual overlays so you can see exactly what’s hurting your metrics.
 
-<!-- TODO: Add screenshot — see STORE_ASSETS.md for guidance -->
+<!-- TODO: Add screenshot — see ./STORE_ASSETS.md for guidance -->
 
 ## Features
 
@@ -75,7 +75,7 @@ These match [web.dev’s Core Web Vitals](https://web.dev/vitals/#core-web-vital
 - **Build for Firefox:** `npm run build:firefox`
 - **Type check:** `npm run compile`
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for project structure, commit conventions, and how to run tests.
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for project structure, commit conventions, and how to run tests.
 
 ## Roadmap
 
@@ -85,11 +85,11 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for project structure, commit conventions
 
 ## Privacy
 
-See [PRIVACY_POLICY.md](PRIVACY_POLICY.md) for details on data handling. The extension does not collect or transmit any personal data.
+See [PRIVACY_POLICY.md](./PRIVACY_POLICY.md) for details on data handling. The extension does not collect or transmit any personal data.
 
 ## License
 
-[Apache-2.0](LICENSE)
+[Apache-2.0](./LICENSE)
 
 ## Related
 

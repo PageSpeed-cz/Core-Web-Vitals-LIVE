@@ -13,7 +13,7 @@ Core Web Vitals Live is a browser extension that measures and displays real-time
 ### What the extension accesses
 
 | Data | Purpose | Storage |
-|------|---------|---------|
+| --- | --- | --- |
 | Performance metrics (LCP, INP, CLS, FCP, TTFB) | Displayed in the HUD overlay, popup, and toolbar badge | Kept in memory and `chrome.storage.local` (per-tab, cleared on tab close) |
 | User preferences (toggle settings, HUD position) | Remembering your configuration | `chrome.storage.sync` (synced across your Chrome devices via your Google account) |
 | Active tab URL and status | Updating the toolbar badge for the current tab | Not stored |
@@ -29,7 +29,7 @@ Core Web Vitals Live is a browser extension that measures and displays real-time
 ## Permissions
 
 | Permission | Why it is needed |
-|------------|------------------|
+| --- | --- |
 | `activeTab` | Access performance data on the tab you are viewing |
 | `tabs` | Update the toolbar badge to reflect the current tab's metrics |
 | `storage` | Save your preferences and per-tab metric snapshots |
@@ -39,7 +39,7 @@ The `debugger` permission is used solely for performance throttling simulation. 
 
 ## Third-Party Services
 
-The extension loads a Google Fonts stylesheet (`fonts.googleapis.com`) for UI typography. Google's privacy policy applies to that request: <https://policies.google.com/privacy>. No other external services are contacted.
+The extension does not contact any third-party services automatically. If you click an external link in the UI (for example the project website link), your browser will navigate to that site as usual.
 
 ## Data Retention
 

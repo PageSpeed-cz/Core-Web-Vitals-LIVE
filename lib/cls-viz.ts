@@ -17,7 +17,7 @@ function clsColor(value: number): string {
 }
 
 function makeLabelHTML(prefix: string, valueText: string, valueColor: string): string {
-  return `${prefix}: <span style="font-family:'Mona Sans',system-ui,sans-serif;font-weight:600;font-variant-numeric:tabular-nums;text-transform:none;color:${valueColor}">${valueText}</span>`;
+  return `${prefix}: <span style="font-weight:600;font-variant-numeric:tabular-nums;text-transform:none;color:${valueColor}">${valueText}</span>`;
 }
 
 const STYLES = `
@@ -40,7 +40,7 @@ const STYLES = `
   left: 50%;
   transform: translateX(-50%);
   margin-top: 4px;
-  font-family: 'Special Gothic Expanded One', system-ui, sans-serif;
+  font-family: system-ui, -apple-system, sans-serif;
   font-size: 12px;
   font-weight: 400;
   text-transform: uppercase;

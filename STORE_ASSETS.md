@@ -1,56 +1,28 @@
-# Chrome Web Store Assets Checklist
+# Store assets (Chrome Web Store)
 
-Before submitting to the Chrome Web Store, prepare the following assets.
+Use this as a checklist when preparing the Chrome Web Store listing assets.
 
-## Required
+## Required (typical)
 
-### Screenshots (at least 1, up to 5)
+- **Extension icon**: 128×128 (already included in the built package).
+- **Screenshots**: show real usage (HUD overlay + popup + visualizations).
 
-- **Size:** 1280 x 800 px or 640 x 400 px
-- **Format:** PNG or JPEG
-- **What to capture:**
-  1. HUD overlay showing live LCP/INP/CLS bars on a real webpage
-  2. CLS purple overlays highlighting layout shifts
-  3. INP badge showing interaction delay
-  4. LCP element outline with label
-  5. Popup with metric summary
+## Recommended screenshot guidance
 
-**How to capture:**
+- **Size**: 1280×800 is a good default (Chrome Web Store accepts common desktop resolutions/aspect ratios).
+- **Count**: 3–5 screenshots.
+- **Content ideas**:
+  - HUD overlay on a real webpage (LCP/INP/CLS visible)
+  - CLS overlay highlighting a shift
+  - INP overlay showing an interaction duration badge
+  - Popup settings toggles (visualizations + throttling)
 
-1. Run `npm run build` and load the extension in Chrome
-2. Open a webpage (e.g. a news site with ads for CLS, or a complex app for INP)
-3. Activate the extension and wait for metrics to populate
-4. Use Chrome DevTools Device Toolbar (Ctrl+Shift+M) set to 1280x800 for consistent sizing
-5. Take screenshots with `Cmd+Shift+4` (macOS) or the DevTools screenshot tool
+## Optional
 
-Save screenshots to `.github/screenshots/` for reference.
+- **Promo tile / marquee assets** (if the dashboard asks for them).
+- **Short video** (e.g. 10–20s screen recording showing HUD + overlays).
 
-### Small Promo Tile
+## Tip: capture clean screenshots
 
-- **Size:** 440 x 280 px
-- **Format:** PNG or JPEG
-- **Content:** Extension logo, name "Core Web Vitals Live", and a short tagline
-
-### Extension Icon
-
-- **Size:** 128 x 128 px (already provided via `public/icon/128.png`)
-
-## Optional (Recommended)
-
-### Large (Marquee) Promo Tile
-
-- **Size:** 1400 x 560 px
-- **Content:** Wider version of the small promo tile, can include a screenshot or illustration
-
-## Store Listing Text
-
-- **Name:** Core Web Vitals Live
-- **Summary (132 chars max):** See your website's performance. Live. Real-time LCP, INP, and CLS metrics with visual overlays.
-- **Category:** Developer Tools
-- **Language:** English
-
-## Privacy
-
-- **Privacy policy URL:** Link to the hosted `PRIVACY_POLICY.md` (e.g. via GitHub Pages or raw GitHub URL)
-- **Single purpose:** Display real-time Core Web Vitals performance metrics with visual overlays
-- **Data use disclosure:** No data collected or transmitted externally
+- Use a neutral test page (or your own site) with predictable animations/layout shifts.
+- Blur/redact sensitive information in the page UI (accounts, emails, dashboards).

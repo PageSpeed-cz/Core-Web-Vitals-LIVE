@@ -26,6 +26,19 @@ Use a stable URL where your privacy policy is hosted, for example:
 
 Note: The Chrome Web Store may require a dedicated webpage; raw GitHub might not be accepted. Prefer hosting a proper HTML page (e.g. via GitHub Pages with a theme that renders the Markdown).
 
+## Upload package (ZIP)
+
+This repo uses WXT to generate the store-ready ZIP.
+
+```bash
+npm ci
+npm run zip
+```
+
+The ZIP you upload is created at:
+
+- `.output/core-web-vitals-live-<version>-chrome.zip`
+
 ## Store assets
 
-See [STORE_ASSETS.md](STORE_ASSETS.md) for screenshot and promo tile requirements and capture instructions.
+See [STORE_ASSETS.md](./STORE_ASSETS.md) for screenshot and promo tile requirements and capture instructions.
