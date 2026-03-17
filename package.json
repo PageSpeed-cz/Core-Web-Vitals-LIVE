@@ -2,7 +2,7 @@
   "name": "core-web-vitals-live",
   "description": "See your website's performance. Live. Core Web Vitals (LCP, INP, CLS) overlay and visualizations.",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "wxt",
