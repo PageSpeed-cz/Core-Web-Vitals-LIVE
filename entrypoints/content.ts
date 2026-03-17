@@ -40,6 +40,34 @@ export default defineContentScript({
     let teardownINP: (() => void) | null = null;
     let lastLCPElement: Element | null = null;
     const currentMetrics: Partial<MetricsState> = {};
+    let extensionContextInvalidated = false;
+
+    function safeSendMessage(message: unknown) {
+      if (extensionContextInvalidated) return;
+      // When the extension reloads/updates, content scripts can keep running briefly.
+      // Guard against "Extension context invalidated" causing uncaught errors.
+      if (!browser?.runtime?.id) return;
+      try {
+        const maybePromise = browser.runtime.sendMessage(message as any);
+        // Some implementations may throw synchronously, others reject asynchronously.
+        if (maybePromise && typeof (maybePromise as any).catch === 'function') {
+          (maybePromise as Promise<unknown>).catch((err: unknown) => {
+            const msg = (err as any)?.message ?? String(err);
+            if (typeof msg === 'string' && msg.toLowerCase().includes('extension context invalidated')) {
+              extensionContextInvalidated = true;
+              deactivate();
+              return;
+            }
+          });
+        }
+      } catch (err: unknown) {
+        const msg = (err as any)?.message ?? String(err);
+        if (typeof msg === 'string' && msg.toLowerCase().includes('extension context invalidated')) {
+          extensionContextInvalidated = true;
+          deactivate();
+        }
+      }
+    }
 
     function applyOptions(next: OptionsState) {
       options = next;
@@ -105,7 +133,7 @@ export default defineContentScript({
           ? { value: m.value, rating: m.rating, label: m.label, badgeLabel: m.badgeLabel ?? undefined }
           : null;
       }
-      browser.runtime.sendMessage({ type: 'METRICS_UPDATE', metrics: payload }).catch(() => {});
+      safeSendMessage({ type: 'METRICS_UPDATE', metrics: payload });
     }
 
     function onMetric(name: string, metric: Metric) {
@@ -162,7 +190,7 @@ export default defineContentScript({
       const stored = data[STORAGE_KEY];
       if (stored) options = { ...DEFAULT_OPTIONS, ...stored };
       init();
-      browser.runtime.sendMessage({ type: 'CONTENT_READY' }).catch(() => {});
+      safeSendMessage({ type: 'CONTENT_READY' });
     });
 
     browser.storage.onChanged.addListener((changes, areaName) => {

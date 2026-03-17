@@ -50,6 +50,44 @@ function getWorstMetric(metrics: MetricsPayload): { rating: Rating } | null {
   return { rating: worst };
 }
 
+const ICON_PATHS = {
+  default: {
+    16: 'icon/16.png',
+    32: 'icon/32.png',
+    48: 'icon/48.png',
+    96: 'icon/96.png',
+    128: 'icon/128.png',
+  },
+  good: {
+    16: 'icon/status/green-16.png',
+    32: 'icon/status/green-32.png',
+    48: 'icon/status/green-48.png',
+    96: 'icon/status/green-96.png',
+    128: 'icon/status/green-128.png',
+  },
+  'needs-improvement': {
+    16: 'icon/status/orange-16.png',
+    32: 'icon/status/orange-32.png',
+    48: 'icon/status/orange-48.png',
+    96: 'icon/status/orange-96.png',
+    128: 'icon/status/orange-128.png',
+  },
+  poor: {
+    16: 'icon/status/red-16.png',
+    32: 'icon/status/red-32.png',
+    48: 'icon/status/red-48.png',
+    96: 'icon/status/red-96.png',
+    128: 'icon/status/red-128.png',
+  },
+} as const;
+
+type IconVariant = keyof typeof ICON_PATHS;
+
+function ratingToVariant(rating: Rating | null | undefined): IconVariant {
+  if (!rating) return 'default';
+  return rating;
+}
+
 /** Fast 4G: 4 Mbps down, 3 Mbps up, 60ms latency (bytes per second) */
 const DOWNLOAD_THROUGHPUT = (4 * 1024 * 1024) / 8;
 const UPLOAD_THROUGHPUT = (3 * 1024 * 1024) / 8;
@@ -59,6 +97,18 @@ const CPU_THROTTLE_RATE = 4;
 const throttledTabs = new Set<number>();
 /** Tabs where the overlay (HUD + viz) is active; survives page reload until tab close or user turn off */
 const activeOverlayTabs = new Set<number>();
+const tabWorstRatings = new Map<number, Rating | null>();
+
+async function setActionIconForTab(tabId: number, rating: Rating | null): Promise<void> {
+  const variant = ratingToVariant(rating);
+  await browser.action.setIcon({
+    tabId,
+    path: ICON_PATHS[variant],
+  });
+
+  // We use the icon itself for state; keep badge empty.
+  await browser.action.setBadgeText({ tabId, text: '' });
+}
 
 async function enableThrottling(tabId: number): Promise<{ ok: boolean; error?: string }> {
   try {
@@ -106,23 +156,11 @@ export default defineBackground(() => {
         const worst = getWorstMetric(message.metrics);
         const tabId = sender.tab?.id;
 
-        const setBadge = (id?: number) => {
-          const color = worst ? BADGE_COLORS[worst.rating] : BADGE_COLORS.good;
-          browser.action.setBadgeText({
-            text: '●',
-            ...(id != null && { tabId: id }),
-          });
-          browser.action.setBadgeTextColor({
-            color,
-            ...(id != null && { tabId: id }),
-          });
-          browser.action.setBadgeBackgroundColor({
-            color: [0, 0, 0, 0],
-            ...(id != null && { tabId: id }),
-          });
-        };
-
-        setBadge(tabId);
+        if (tabId != null) {
+          const rating = worst?.rating ?? null;
+          tabWorstRatings.set(tabId, rating);
+          setActionIconForTab(tabId, rating).catch(() => {});
+        }
         if (tabId != null) {
           browser.storage.local.get('metrics').then((prev) => {
             const all = (prev.metrics as Record<number, MetricsPayload>) ?? {};
@@ -188,8 +226,14 @@ export default defineBackground(() => {
     if (source.tabId != null) throttledTabs.delete(source.tabId);
   });
 
+  browser.tabs.onActivated.addListener(({ tabId }) => {
+    const rating = tabWorstRatings.get(tabId) ?? null;
+    setActionIconForTab(tabId, rating).catch(() => {});
+  });
+
   browser.tabs.onRemoved.addListener((tabId) => {
     throttledTabs.delete(tabId);
     activeOverlayTabs.delete(tabId);
+    tabWorstRatings.delete(tabId);
   });
 });
