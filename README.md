@@ -38,7 +38,7 @@ All metrics are measured with the same logic and thresholds as [web-vitals](http
 ### Chrome Web Store (when published)
 
 1. From the repo root: `npm ci`, then `npm run zip` — upload `.output/core-web-vitals-live-<version>-chrome.zip` (see [PUBLISHING.md](./PUBLISHING.md)).
-2. Step-by-step checklist: [CHROME_WEB_STORE.md](./CHROME_WEB_STORE.md#first-submission-checklist) — permissions, data disclosure, screenshots ([STORE_ASSETS.md](./STORE_ASSETS.md)).
+2. Step-by-step checklist: [CHROME_WEB_STORE.md](./CHROME_WEB_STORE.md#first-submission-checklist) — permissions, data disclosure, screenshots ([STORE_ASSETS.md](./STORE_ASSETS.md)), listing text ([STORE_LISTING_COPY.md](./STORE_LISTING_COPY.md)).
 3. **Privacy policy URL** for the dashboard (live copy): [pagespeed-cz.github.io/Core-Web-Vitals-LIVE/privacy-policy.html](https://pagespeed-cz.github.io/Core-Web-Vitals-LIVE/privacy-policy.html)
 
 *(Chrome Web Store listing link: add here after publication.)*

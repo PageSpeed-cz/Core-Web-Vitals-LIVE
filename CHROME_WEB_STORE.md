@@ -68,7 +68,7 @@ The ZIP you upload is created at:
 
 ## Store assets
 
-See [STORE_ASSETS.md](./STORE_ASSETS.md) for screenshot and promo tile requirements and capture instructions.
+See [STORE_ASSETS.md](./STORE_ASSETS.md) for screenshot and promo image specs; [STORE_LISTING_COPY.md](./STORE_LISTING_COPY.md) for draft short/long listing text.
 
 ## First submission checklist
 
