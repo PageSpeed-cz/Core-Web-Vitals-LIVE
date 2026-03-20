@@ -39,8 +39,9 @@ All metrics are measured with the same logic and thresholds as [web-vitals](http
 
 1. From the repo root: `npm ci`, then `npm run zip` — upload `.output/core-web-vitals-live-<version>-chrome.zip` (see [PUBLISHING.md](./PUBLISHING.md)).
 2. Copy permission and privacy answers from [CHROME_WEB_STORE.md](./CHROME_WEB_STORE.md); screenshots: [STORE_ASSETS.md](./STORE_ASSETS.md).
+3. **Privacy policy URL** for the dashboard (live copy): [pagespeed-cz.github.io/Core-Web-Vitals-LIVE/privacy-policy.html](https://pagespeed-cz.github.io/Core-Web-Vitals-LIVE/privacy-policy.html)
 
-*(Public store link: add here after publication.)*
+*(Chrome Web Store listing link: add here after publication.)*
 
 ## Usage
 
@@ -88,7 +89,9 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for project structure, commit conventio
 
 ## Privacy
 
-See [PRIVACY_POLICY.md](./PRIVACY_POLICY.md) for details on data handling. The extension does not collect or transmit any personal data.
+The extension does not collect or transmit any personal data. Full text: [PRIVACY_POLICY.md](./PRIVACY_POLICY.md) (source in the repo).
+
+**Public page (for users & Chrome Web Store):** [Privacy policy on GitHub Pages](https://pagespeed-cz.github.io/Core-Web-Vitals-LIVE/privacy-policy.html) — same content as above, hosted over HTTPS.
 
 ## License
 

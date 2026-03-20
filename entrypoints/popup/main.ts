@@ -1,4 +1,5 @@
 import './style.css';
+import { PRIVACY_POLICY_PAGE_URL } from '../../lib/privacy-policy-url';
 import type { OptionsState } from '../../lib/types';
 import { DEFAULT_OPTIONS } from '../../lib/types';
 
@@ -63,6 +64,9 @@ function render(
         <span class="toggle-label">LCP (largest content)</span>
       </label>
     </section>
+    <p class="popup-footer">
+      <a href="${PRIVACY_POLICY_PAGE_URL}" target="_blank" rel="noopener">Privacy policy</a>
+    </p>
   `;
 
   const throttleEl = document.getElementById('throttle') as HTMLInputElement;

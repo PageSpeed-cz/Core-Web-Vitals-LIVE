@@ -104,3 +104,17 @@ h1 {
   font-size: 13px;
   color: #333;
 }
+
+.popup-footer {
+  margin: 14px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid #e8e8f0;
+  font-size: 12px;
+  text-align: center;
+}
+.popup-footer a {
+  color: #666;
+}
+.popup-footer a:hover {
+  color: #1a1a3e;
+}

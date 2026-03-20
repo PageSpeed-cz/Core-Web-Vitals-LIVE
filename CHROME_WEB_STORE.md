@@ -46,7 +46,10 @@ The file [`docs/privacy-policy.html`](./docs/privacy-policy.html) is **generated
 3. After ~1 minute, open the URL GitHub shows — typically  
    `https://<username>.github.io/<repository>/privacy-policy.html`
 
-**Chrome Web Store:** use that full `https://…/privacy-policy.html` link.
+**Chrome Web Store:** paste the full HTTPS URL into the privacy policy field.
+
+**Published URL (this project):**  
+[https://pagespeed-cz.github.io/Core-Web-Vitals-LIVE/privacy-policy.html](https://pagespeed-cz.github.io/Core-Web-Vitals-LIVE/privacy-policy.html)
 
 [`docs/.nojekyll`](./docs/.nojekyll) turns off Jekyll so the HTML is served as-is. After you edit `PRIVACY_POLICY.md`, run `npm run privacy-page` (or any `build` / `zip`) and **commit** the updated `docs/privacy-policy.html` so GitHub Pages picks it up.
 

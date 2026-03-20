@@ -1,6 +1,6 @@
 # Store assets (Chrome Web Store)
 
-Use this as a checklist when preparing the Chrome Web Store listing assets. For permission justifications, data disclosure answers, and ZIP steps, see [CHROME_WEB_STORE.md](./CHROME_WEB_STORE.md) and [PUBLISHING.md](./PUBLISHING.md).
+Use this as a checklist when preparing the Chrome Web Store listing assets. For permission justifications, data disclosure answers, ZIP steps, and the **live privacy policy URL**, see [CHROME_WEB_STORE.md](./CHROME_WEB_STORE.md) and [PUBLISHING.md](./PUBLISHING.md).
 
 ## Required (typical)
 

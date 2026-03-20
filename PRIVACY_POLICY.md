@@ -2,7 +2,10 @@
 
 **Last updated:** March 15, 2026
 
-> **Chrome Web Store:** GitHub Pages hosts `docs/privacy-policy.html`, which is **generated from this file** when you run `npm run build`, `npm run zip`, or `npm run privacy-page`. Edit policy text only here.
+**Published copy (HTTPS, for users & store listing):**  
+[https://pagespeed-cz.github.io/Core-Web-Vitals-LIVE/privacy-policy.html](https://pagespeed-cz.github.io/Core-Web-Vitals-LIVE/privacy-policy.html)
+
+> **Maintainers:** `docs/privacy-policy.html` is **generated from this file** when you run `npm run build`, `npm run zip`, or `npm run privacy-page`. Edit policy text only here. The popup “Privacy policy” link uses [`lib/privacy-policy-url.ts`](./lib/privacy-policy-url.ts) — keep that URL in sync with GitHub Pages.
 
 
 ## Overview
