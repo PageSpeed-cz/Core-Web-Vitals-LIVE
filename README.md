@@ -24,21 +24,21 @@ All metrics are measured with the same logic and thresholds as [web-vitals](http
 
 1. Clone the repo and install dependencies:
    ```bash
-   git clone https://github.com/machal/Core-Web-Vitals-Live.git
-   cd core-web-vitals-live
+   git clone https://github.com/PageSpeed-cz/Core-Web-Vitals-LIVE.git
+   cd Core-Web-Vitals-LIVE
    npm install
    ```
 2. Build the extension:
    ```bash
    npm run build
    ```
-3. In Chrome: open `chrome://extensions`, turn on **Developer mode**, click **Load unpacked**, and select the `core-web-vitals-live/.output/chrome-mv3` folder (or the root folder if your build outputs there).
+3. In Chrome: open `chrome://extensions`, turn on **Developer mode**, click **Load unpacked**, and select the `Core-Web-Vitals-LIVE/.output/chrome-mv3` folder.
 4. Pin the extension if you like; the badge and popup will reflect the active tab’s metrics.
 
 ### Chrome Web Store (when published)
 
 1. From the repo root: `npm ci`, then `npm run zip` — upload `.output/core-web-vitals-live-<version>-chrome.zip` (see [PUBLISHING.md](./PUBLISHING.md)).
-2. Copy permission and privacy answers from [CHROME_WEB_STORE.md](./CHROME_WEB_STORE.md); screenshots: [STORE_ASSETS.md](./STORE_ASSETS.md).
+2. Step-by-step checklist: [CHROME_WEB_STORE.md](./CHROME_WEB_STORE.md#first-submission-checklist) — permissions, data disclosure, screenshots ([STORE_ASSETS.md](./STORE_ASSETS.md)).
 3. **Privacy policy URL** for the dashboard (live copy): [pagespeed-cz.github.io/Core-Web-Vitals-LIVE/privacy-policy.html](https://pagespeed-cz.github.io/Core-Web-Vitals-LIVE/privacy-policy.html)
 
 *(Chrome Web Store listing link: add here after publication.)*

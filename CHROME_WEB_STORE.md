@@ -69,3 +69,15 @@ The ZIP you upload is created at:
 ## Store assets
 
 See [STORE_ASSETS.md](./STORE_ASSETS.md) for screenshot and promo tile requirements and capture instructions.
+
+## First submission checklist
+
+Use this on the day you publish (order is a suggestion):
+
+- [ ] `npm ci` and `npm run zip` — upload `.output/core-web-vitals-live-<version>-chrome.zip` in Developer Dashboard → **New item**.
+- [ ] Load unpacked `.output/chrome-mv3` once more and smoke-test popup, HUD, throttling.
+- [ ] Add **3–5 screenshots** (see [STORE_ASSETS.md](./STORE_ASSETS.md)), short + long description, category, language.
+- [ ] **Privacy policy URL:** [published privacy page](https://pagespeed-cz.github.io/Core-Web-Vitals-LIVE/privacy-policy.html) (must load over HTTPS).
+- [ ] **Data usage** questionnaire — align with [PRIVACY_POLICY.md](./PRIVACY_POLICY.md) (no collection / no remote transmission).
+- [ ] **Permission justifications** — copy from the sections above (`debugger`, `tabs`, broad host access, …).
+- [ ] Submit for review; after approval, add the public listing URL to [README.md](./README.md) (*Chrome Web Store* section).

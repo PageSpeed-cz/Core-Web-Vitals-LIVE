@@ -12,7 +12,7 @@ Thanks for your interest in contributing. This document covers local setup, proj
 
 1. **Clone and install**
    ```bash
-   git clone https://github.com/machal/Core-Web-Vitals-Live.git
+   git clone https://github.com/PageSpeed-cz/Core-Web-Vitals-LIVE.git
    cd core-web-vitals-live
    npm install
    ```
@@ -93,6 +93,6 @@ If you add new features, please add a short note in the PR on how you tested the
 
 ## Questions
 
-Open a [GitHub Discussion](https://github.com/machal/Core-Web-Vitals-Live/discussions) or an [Issue](https://github.com/machal/Core-Web-Vitals-Live/issues) for bugs and feature requests.
+Open a [GitHub Discussion](https://github.com/PageSpeed-cz/Core-Web-Vitals-LIVE/discussions) or an [Issue](https://github.com/PageSpeed-cz/Core-Web-Vitals-LIVE/issues) for bugs and feature requests.
 
 Thank you for contributing.
