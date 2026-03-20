@@ -37,7 +37,10 @@ All metrics are measured with the same logic and thresholds as [web-vitals](http
 
 ### Chrome Web Store (when published)
 
-*(Link will be added when the extension is published.)*
+1. From the repo root: `npm ci`, then `npm run zip` — upload `.output/core-web-vitals-live-<version>-chrome.zip` (see [PUBLISHING.md](./PUBLISHING.md)).
+2. Copy permission and privacy answers from [CHROME_WEB_STORE.md](./CHROME_WEB_STORE.md); screenshots: [STORE_ASSETS.md](./STORE_ASSETS.md).
+
+*(Public store link: add here after publication.)*
 
 ## Usage
 
