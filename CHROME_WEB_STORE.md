@@ -37,7 +37,7 @@ Chrome may show one combined “justification” area or separate fields per per
 
 ## Privacy policy URL (GitHub Pages)
 
-The repo includes a static page at [`docs/privacy-policy.html`](./docs/privacy-policy.html) (keep in sync with [`PRIVACY_POLICY.md`](./PRIVACY_POLICY.md)).
+The file [`docs/privacy-policy.html`](./docs/privacy-policy.html) is **generated from** [`PRIVACY_POLICY.md`](./PRIVACY_POLICY.md) on every `npm run build` and `npm run zip` (script: `npm run privacy-page`). Edit only `PRIVACY_POLICY.md`.
 
 **Setup:**
 
@@ -48,7 +48,7 @@ The repo includes a static page at [`docs/privacy-policy.html`](./docs/privacy-p
 
 **Chrome Web Store:** use that full `https://…/privacy-policy.html` link.
 
-[`docs/.nojekyll`](./docs/.nojekyll) turns off Jekyll so the HTML is served as-is. When policy text changes, update both `PRIVACY_POLICY.md` and `docs/privacy-policy.html`.
+[`docs/.nojekyll`](./docs/.nojekyll) turns off Jekyll so the HTML is served as-is. After you edit `PRIVACY_POLICY.md`, run `npm run privacy-page` (or any `build` / `zip`) and **commit** the updated `docs/privacy-policy.html` so GitHub Pages picks it up.
 
 ## Upload package (ZIP)
 

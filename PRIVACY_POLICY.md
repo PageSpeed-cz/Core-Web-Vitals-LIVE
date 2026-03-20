@@ -2,7 +2,7 @@
 
 **Last updated:** March 15, 2026
 
-> **Chrome Web Store:** The same policy is published for reviewers at `docs/privacy-policy.html` (GitHub Pages). If you edit this file, update the HTML copy too so they stay in sync.
+> **Chrome Web Store:** GitHub Pages hosts `docs/privacy-policy.html`, which is **generated from this file** when you run `npm run build`, `npm run zip`, or `npm run privacy-page`. Edit policy text only here.
 
 
 ## Overview

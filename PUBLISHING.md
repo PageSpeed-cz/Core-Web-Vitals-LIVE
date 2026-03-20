@@ -2,6 +2,8 @@
 
 This repo uses [WXT](https://wxt.dev/) to generate a **Manifest V3** extension build and a **store-ready ZIP**.
 
+`npm run build` and `npm run zip` automatically regenerate **`docs/privacy-policy.html`** from **`PRIVACY_POLICY.md`** (for GitHub Pages). Commit that HTML when the policy text changes so the live policy URL stays up to date.
+
 ## What you upload to the Chrome Web Store
 
 Upload the ZIP produced by:

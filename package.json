@@ -7,14 +7,18 @@
   "scripts": {
     "dev": "wxt",
     "dev:firefox": "wxt -b firefox",
+    "privacy-page": "node scripts/generate-privacy-html.mjs",
+    "prebuild": "npm run privacy-page",
     "build": "wxt build",
-    "build:firefox": "wxt build -b firefox",
+    "build:firefox": "npm run privacy-page && wxt build -b firefox",
+    "prezip": "npm run privacy-page",
     "zip": "wxt zip",
-    "zip:firefox": "wxt zip -b firefox",
+    "zip:firefox": "npm run privacy-page && wxt zip -b firefox",
     "compile": "tsc --noEmit",
     "postinstall": "wxt prepare"
   },
   "devDependencies": {
+    "marked": "^15.0.12",
     "typescript": "^5.9.3",
     "wxt": "^0.20.18"
   },
