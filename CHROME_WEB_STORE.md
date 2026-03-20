@@ -26,6 +26,12 @@ Chrome may show one combined “justification” area or separate fields per per
 
 > The content script runs on pages the user opens so it can measure LCP, INP, and CLS and draw the optional HUD and metric overlays. It does not send page data or metrics to external servers; everything is processed locally for display in the extension UI.
 
+## Host permission justification (separate field in Privacy tab)
+
+The dashboard has a dedicated **"Host permission justification"** text area under Privacy → Permissions. Copy the text below:
+
+> This extension needs to run on all URLs because it measures real-time Core Web Vitals (LCP, INP, CLS) on whatever page the user is currently viewing. The content script observes browser performance APIs (PerformanceObserver for layout-shift, largest-contentful-paint, and event timing) and draws a HUD overlay and visual highlights directly on the page. It does not read page content (forms, text, cookies), does not modify the page beyond its own UI overlays, and does not send any data to external servers. All metric data stays local to the user's browser.
+
 ## Single purpose description
 
 **Single purpose (short):** Display real-time Core Web Vitals (LCP, INP, CLS) performance metrics with visual overlays on web pages.
@@ -79,5 +85,6 @@ Use this on the day you publish (order is a suggestion):
 - [ ] Add **3–5 screenshots** (see [STORE_ASSETS.md](./STORE_ASSETS.md)), short + long description, category, language.
 - [ ] **Privacy policy URL:** [published privacy page](https://pagespeed-cz.github.io/Core-Web-Vitals-LIVE/privacy-policy.html) (must load over HTTPS).
 - [ ] **Data usage** questionnaire — align with [PRIVACY_POLICY.md](./PRIVACY_POLICY.md) (no collection / no remote transmission).
-- [ ] **Permission justifications** — copy from the sections above (`debugger`, `tabs`, broad host access, …).
+- [ ] **Permission justifications** — copy from the sections above (`debugger`, `tabs`, `storage`, `activeTab`).
+- [ ] **Host permission justification** — separate field under Privacy; copy from the "Host permission justification" section above.
 - [ ] Submit for review; after approval, add the public listing URL to [README.md](./README.md) (*Chrome Web Store* section).
