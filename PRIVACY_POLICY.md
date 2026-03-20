@@ -2,6 +2,9 @@
 
 **Last updated:** March 15, 2026
 
+> **Chrome Web Store:** The same policy is published for reviewers at `docs/privacy-policy.html` (GitHub Pages). If you edit this file, update the HTML copy too so they stay in sync.
+
+
 ## Overview
 
 Core Web Vitals Live is a browser extension that measures and displays real-time Core Web Vitals (LCP, INP, CLS) performance metrics for webpages you visit. Your privacy is important to us, and this policy explains what data the extension accesses and how it is used.

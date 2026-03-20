@@ -35,14 +35,20 @@ Chrome may show one combined “justification” area or separate fields per per
 - **Does your extension collect or transmit user data?** No (or only as described below)
 - **Data handling:** All data stays on the user's device. Performance metrics are shown in the extension UI; user preferences are stored in Chrome sync storage. Nothing is sent to external servers.
 
-## Privacy policy URL
+## Privacy policy URL (GitHub Pages)
 
-Use a stable URL where your privacy policy is hosted, for example:
+The repo includes a static page at [`docs/privacy-policy.html`](./docs/privacy-policy.html) (keep in sync with [`PRIVACY_POLICY.md`](./PRIVACY_POLICY.md)).
 
-- GitHub Pages: `https://<your-username>.github.io/Core-Web-Vitals-Live/PRIVACY_POLICY` (enable Pages and copy `PRIVACY_POLICY.md` as the source, or use a tool that renders Markdown)
-- Raw GitHub (readable): `https://github.com/machal/Core-Web-Vitals-Live/blob/main/PRIVACY_POLICY.md`
+**Setup:**
 
-Note: The Chrome Web Store may require a dedicated webpage; raw GitHub might not be accepted. Prefer hosting a proper HTML page (e.g. via GitHub Pages with a theme that renders the Markdown).
+1. Push the `docs/` folder to GitHub.
+2. **Settings** → **Pages** → **Source:** **Deploy from a branch** → branch **main** (or default) → folder **`/docs`** → **Save**.
+3. After ~1 minute, open the URL GitHub shows — typically  
+   `https://<username>.github.io/<repository>/privacy-policy.html`
+
+**Chrome Web Store:** use that full `https://…/privacy-policy.html` link.
+
+[`docs/.nojekyll`](./docs/.nojekyll) turns off Jekyll so the HTML is served as-is. When policy text changes, update both `PRIVACY_POLICY.md` and `docs/privacy-policy.html`.
 
 ## Upload package (ZIP)
 

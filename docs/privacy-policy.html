@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Privacy Policy – Core Web Vitals Live</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body { font-family: system-ui, sans-serif; line-height: 1.5; max-width: 42rem; margin: 2rem auto; padding: 0 1rem; }
+    h1 { font-size: 1.5rem; }
+    h2 { font-size: 1.15rem; margin-top: 1.75rem; }
+    table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+    th, td { border: 1px solid #8884; padding: 0.4rem 0.5rem; text-align: left; vertical-align: top; }
+    th { font-weight: 600; }
+    code { font-size: 0.88em; }
+    .muted { opacity: 0.85; font-size: 0.95rem; }
+    .note { font-size: 0.85rem; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #8884; }
+  </style>
+</head>
+<body>
+  <!-- Keep in sync with PRIVACY_POLICY.md in the repository root. -->
+  <h1>Privacy Policy – Core Web Vitals Live</h1>
+  <p class="muted"><strong>Last updated:</strong> March 15, 2026</p>
+
+  <h2>Overview</h2>
+  <p>Core Web Vitals Live is a browser extension that measures and displays real-time Core Web Vitals (LCP, INP, CLS) performance metrics for webpages you visit. Your privacy is important to us, and this policy explains what data the extension accesses and how it is used.</p>
+
+  <h2>Data Collection</h2>
+  <p><strong>Core Web Vitals Live does not collect, transmit, or share any personal data.</strong> All data stays on your device.</p>
+
+  <h3>What the extension accesses</h3>
+  <table>
+    <thead>
+      <tr><th>Data</th><th>Purpose</th><th>Storage</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Performance metrics (LCP, INP, CLS, FCP, TTFB)</td>
+        <td>Displayed in the HUD overlay, popup, and toolbar badge</td>
+        <td>Kept in memory and <code>chrome.storage.local</code> (per-tab, cleared on tab close)</td>
+      </tr>
+      <tr>
+        <td>User preferences (toggle settings, HUD position)</td>
+        <td>Remembering your configuration</td>
+        <td><code>chrome.storage.sync</code> (synced across your Chrome devices via your Google account)</td>
+      </tr>
+      <tr>
+        <td>Active tab URL and status</td>
+        <td>Updating the toolbar badge for the current tab</td>
+        <td>Not stored</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>What the extension does NOT do</h3>
+  <ul>
+    <li>Does <strong>not</strong> collect browsing history or personal information.</li>
+    <li>Does <strong>not</strong> send any data to external servers, APIs, or third parties.</li>
+    <li>Does <strong>not</strong> use analytics, tracking, or telemetry of any kind.</li>
+    <li>Does <strong>not</strong> inject ads or modify page content beyond its own overlays.</li>
+    <li>Does <strong>not</strong> read or access page content such as form inputs, passwords, or cookies.</li>
+  </ul>
+
+  <h2>Permissions</h2>
+  <table>
+    <thead>
+      <tr><th>Permission</th><th>Why it is needed</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>activeTab</code></td><td>Access performance data on the tab you are viewing</td></tr>
+      <tr><td><code>tabs</code></td><td>Update the toolbar badge to reflect the current tab’s metrics</td></tr>
+      <tr><td><code>storage</code></td><td>Save your preferences and per-tab metric snapshots</td></tr>
+      <tr><td><code>debugger</code></td><td>Optionally throttle CPU or network speed to simulate slower devices (DevTools protocol)</td></tr>
+    </tbody>
+  </table>
+  <p>The <code>debugger</code> permission is used solely for performance throttling simulation. It is never used to read, intercept, or modify network traffic or page data.</p>
+
+  <h2>Third-Party Services</h2>
+  <p>The extension does not contact any third-party services automatically. If you click an external link in the UI (for example the project website link), your browser will navigate to that site as usual.</p>
+
+  <h2>Data Retention</h2>
+  <ul>
+    <li><strong>Per-tab metrics</strong> are held in memory and <code>storage.local</code> only while the tab is open; they are removed when the tab is closed.</li>
+    <li><strong>User preferences</strong> are stored in <code>storage.sync</code> and persist until you change or remove them.</li>
+    <li>Uninstalling the extension removes all stored data.</li>
+  </ul>
+
+  <h2>Changes to This Policy</h2>
+  <p>If this policy is updated, the new version will be published at the same URL and the “Last updated” date will be revised.</p>
+
+  <h2>Contact</h2>
+  <p>If you have questions about this privacy policy, please open an issue on the project’s GitHub repository.</p>
+
+  <p class="note">This page is hosted for the Chrome Web Store listing. Source of truth in the repo: <code>PRIVACY_POLICY.md</code>.</p>
+</body>
+</html>
