@@ -183,6 +183,9 @@ export default defineContentScript({
       hudFrame.style.borderRadius = '16px';
       hudFrame.style.overflow = 'hidden';
       hudFrameReady = false;
+      let ghost: HTMLDivElement | null = null;
+      let ghostStartLeft = 0;
+      let ghostStartTop = 0;
       let dragOffsetX = 0;
       let dragOffsetY = 0;
       let dragStartLeft = 0;
@@ -191,6 +194,7 @@ export default defineContentScript({
       let pendingLeft = 0;
       let pendingTop = 0;
       let raf = 0;
+      let pendingSize: { w: number | null; h: number | null } = { w: null, h: null };
 
       window.addEventListener('message', (event) => {
         const msg = event.data;
@@ -207,6 +211,10 @@ export default defineContentScript({
         if (msg.type === 'HUD_SIZE') {
           const h = typeof msg.height === 'number' ? Math.max(1, Math.min(1000, msg.height)) : null;
           const w = typeof msg.width === 'number' ? Math.max(240, Math.min(480, msg.width)) : null;
+          if (dragging) {
+            pendingSize = { w, h };
+            return;
+          }
           if (hudFrame && h != null) hudFrame.style.height = `${h}px`;
           if (hudWrap && h != null) hudWrap.style.height = `${h}px`;
           if (hudFrame && w != null) hudFrame.style.width = `${w}px`;
@@ -223,10 +231,30 @@ export default defineContentScript({
           pendingLeft = rect.left;
           pendingTop = rect.top;
           dragging = true;
+
+          ghost = document.createElement('div');
+          ghost.id = 'cwv-live-hud-ghost';
+          ghost.style.position = 'fixed';
+          ghost.style.zIndex = '2147483647';
+          ghost.style.left = `${rect.left}px`;
+          ghost.style.top = `${rect.top}px`;
+          ghost.style.width = `${rect.width}px`;
+          ghost.style.height = `${rect.height}px`;
+          ghost.style.borderRadius = '16px';
+          ghost.style.border = '2px solid rgba(255,255,255,0.22)';
+          ghost.style.background = 'rgba(0,0,0,0.06)';
+          ghost.style.boxShadow = '0 16px 44px rgba(0,0,0,0.35)';
+          ghost.style.pointerEvents = 'none';
+          ghost.style.willChange = 'transform';
+          ghost.style.cursor = 'move';
+          document.documentElement.appendChild(ghost);
+
+          ghostStartLeft = rect.left;
+          ghostStartTop = rect.top;
           return;
         }
         if (msg.type === 'HUD_DRAG_MOVE') {
-          if (!dragging || !hudWrap) return;
+          if (!dragging || !ghost) return;
           const dx = typeof msg.dx === 'number' ? msg.dx : (msg.clientX ?? 0) - dragOffsetX - dragStartLeft;
           const dy = typeof msg.dy === 'number' ? msg.dy : (msg.clientY ?? 0) - dragOffsetY - dragStartTop;
           pendingLeft = Math.max(0, dragStartLeft + dx);
@@ -234,11 +262,10 @@ export default defineContentScript({
           if (!raf) {
             raf = requestAnimationFrame(() => {
               raf = 0;
-              if (!hudWrap) return;
-              // Use transform while dragging to avoid layout churn/jitter.
-              const tx = pendingLeft - dragStartLeft;
-              const ty = pendingTop - dragStartTop;
-              hudWrap.style.transform = `translate3d(${tx}px, ${ty}px, 0)`;
+              if (!ghost) return;
+              const tx = pendingLeft - ghostStartLeft;
+              const ty = pendingTop - ghostStartTop;
+              ghost.style.transform = `translate3d(${tx}px, ${ty}px, 0)`;
             });
           }
           return;
@@ -250,11 +277,27 @@ export default defineContentScript({
             cancelAnimationFrame(raf);
             raf = 0;
           }
-          hudWrap.style.transform = '';
           hudWrap.style.right = 'auto';
           hudWrap.style.left = `${pendingLeft}px`;
           hudWrap.style.top = `${pendingTop}px`;
           saveOptions({ hudPosition: { top: Math.max(0, pendingTop), left: Math.max(0, pendingLeft) } });
+
+          if (ghost) {
+            try {
+              ghost.remove();
+            } catch {}
+          }
+          ghost = null;
+
+          if (pendingSize.w != null) {
+            hudFrame!.style.width = `${pendingSize.w}px`;
+            hudWrap.style.width = `${pendingSize.w}px`;
+          }
+          if (pendingSize.h != null) {
+            hudFrame!.style.height = `${pendingSize.h}px`;
+            hudWrap.style.height = `${pendingSize.h}px`;
+          }
+          pendingSize = { w: null, h: null };
           return;
         }
         if (msg.type === 'HUD_CLOSE') {
