@@ -117,13 +117,13 @@ root.innerHTML = `
 
     <div class="${PREFIX}-footer">
       <div class="${PREFIX}-footer-links">
-        <a href="#" data-testlink>Test your site speed</a>
+        <a href="#" target="_blank" rel="noopener" data-testlink>Test your site speed</a>
         <span class="${PREFIX}-sep">—</span>
-        <a href="#" data-homelink>Home</a>
+        <a href="#" target="_blank" rel="noopener" data-homelink>Home</a>
         <span class="${PREFIX}-sep">—</span>
-        <a href="#" data-privlink>Privacy</a>
+        <a href="#" target="_blank" rel="noopener" data-privlink>Privacy</a>
       </div>
-      <a class="${PREFIX}-byline" href="#" data-pagespeedlink>
+      <a class="${PREFIX}-byline" href="#" target="_blank" rel="noopener" data-pagespeedlink>
         <span class="${PREFIX}-psmark" aria-hidden="true">${PAGESPEED_MARK_SVG}</span>
         <span class="${PREFIX}-byline-text">Brought to you by PageSpeed.ONE</span>
       </a>

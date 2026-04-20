@@ -11,8 +11,12 @@ import { createHUD, destroyHUD, updateHUD } from '../lib/hud';
 import { initCLSViz, destroyCLSViz } from '../lib/cls-viz';
 import { initINPViz, destroyINPViz } from '../lib/inp-viz';
 import { showLCPElement, destroyLCPViz } from '../lib/lcp-viz';
+import { PRIVACY_POLICY_PAGE_URL } from '../lib/privacy-policy-url';
 
 const STORAGE_KEY = 'cwv-live-options';
+const LOGO_URL = 'https://pagespeed.one/en';
+const TEST_INSIGHTS_URL = 'https://pagespeed.one/en/app/insights';
+const EXTENSION_HOME_URL = 'https://github.com/PageSpeed-cz/Core-Web-Vitals-LIVE';
 
 function metricToState(metric: Metric, format: (v: number) => string): MetricState {
   return {
@@ -139,6 +143,12 @@ export default defineContentScript({
             throttled,
             options,
           },
+          urls: {
+            test: TEST_INSIGHTS_URL,
+            home: EXTENSION_HOME_URL,
+            privacy: PRIVACY_POLICY_PAGE_URL,
+            pagespeed: LOGO_URL,
+          },
         },
         '*'
       );
@@ -153,7 +163,7 @@ export default defineContentScript({
       hudWrap.style.pointerEvents = 'auto';
       hudWrap.style.borderRadius = '16px';
       hudWrap.style.boxShadow = '0 16px 44px rgba(0,0,0,0.55)';
-      hudWrap.style.border = '1px solid rgba(255,255,255,0.12)';
+      hudWrap.style.border = '0';
       hudWrap.style.background = 'rgba(0,0,0,0.01)'; // enable backdrop-filter
       (hudWrap.style as any).backdropFilter = 'blur(26px) saturate(1.35)';
       (hudWrap.style as any).webkitBackdropFilter = 'blur(26px) saturate(1.35)';
