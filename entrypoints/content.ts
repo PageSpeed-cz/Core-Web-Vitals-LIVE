@@ -7,7 +7,7 @@ import { initMetrics, formatLCP, formatINP, formatCLS, formatFCP, formatTTFB } f
 import type { Metric } from '../lib/metrics';
 import type { MetricsState, MetricState, OptionsState } from '../lib/types';
 import { DEFAULT_OPTIONS } from '../lib/types';
-import { createHUD, updateHUD, destroyHUD } from '../lib/hud';
+import { destroyHUD } from '../lib/hud';
 import { initCLSViz, destroyCLSViz } from '../lib/cls-viz';
 import { initINPViz, destroyINPViz } from '../lib/inp-viz';
 import { showLCPElement, destroyLCPViz } from '../lib/lcp-viz';
@@ -36,6 +36,7 @@ export default defineContentScript({
     let options: OptionsState = { ...DEFAULT_OPTIONS };
     let overlayActive = false;
     let hudRoot: HTMLElement | null = null;
+    let hudFrame: HTMLIFrameElement | null = null;
     let teardownCLS: (() => void) | null = null;
     let teardownINP: (() => void) | null = null;
     let lastLCPElement: Element | null = null;
@@ -96,51 +97,88 @@ export default defineContentScript({
     function saveOptions(partial: Partial<OptionsState>) {
       options = { ...options, ...partial };
       browser.storage.sync.set({ [STORAGE_KEY]: options }).catch(() => {});
-      if (hudRoot) updateHUD(hudRoot, {}, { options });
+      sendHudState();
       applyOptions(options);
     }
 
-    function ensureHUD() {
-      if (!hudRoot) {
-        hudRoot = createHUD({
-          callbacks: {
-            onToggleActive: (nextActive) => {
-              safeSendMessage({ type: nextActive ? 'ACTIVATE_FOR_TAB' : 'DEACTIVATE_FOR_TAB' });
-            },
-            onClose: () => {
-              safeSendMessage({ type: 'DEACTIVATE_FOR_TAB' });
-              safeSendMessage({ type: 'TOGGLE_THROTTLING', enabled: false });
-              throttled = false;
-              hideHUD();
-            },
-            onSetOptionsExpanded: (expanded) => {
-              saveOptions({ hudOptionsExpanded: expanded });
-            },
-            onSetOption: (partial) => {
-              saveOptions(partial);
-            },
-            onToggleThrottling: (enabled) => {
-              safeSendMessage({ type: 'TOGGLE_THROTTLING', enabled });
-              throttled = enabled;
-              if (hudRoot) updateHUD(hudRoot, {}, { throttled });
-            },
-            onSetPosition: (pos) => {
-              saveOptions({ hudPosition: pos });
-            },
+    function sendHudState() {
+      if (!hudFrame || !hudFrame.contentWindow) return;
+      hudFrame.contentWindow.postMessage(
+        {
+          source: 'cwv-live-parent',
+          type: 'HUD_STATE',
+          metrics: {
+            LCP: currentMetrics.LCP ?? null,
+            INP: currentMetrics.INP ?? null,
+            CLS: currentMetrics.CLS ?? null,
           },
           ui: {
-            active: overlayActive,
             throttled,
             options,
           },
-        });
-        updateHUD(hudRoot, currentMetrics, { active: overlayActive, throttled, options });
-      }
+        },
+        '*'
+      );
+    }
+
+    function ensureHUD() {
+      if (hudFrame) return;
+      hudFrame = document.createElement('iframe');
+      hudFrame.id = 'cwv-live-hud-frame';
+      hudFrame.src = browser.runtime.getURL('/hud-frame.html' as any);
+      hudFrame.style.position = 'fixed';
+      hudFrame.style.zIndex = '2147483646';
+      hudFrame.style.border = '0';
+      hudFrame.style.background = 'transparent';
+      hudFrame.style.width = '360px';
+      hudFrame.style.height = '520px';
+      hudFrame.style.pointerEvents = 'auto';
+      hudFrame.style.top = options.hudPosition?.top != null ? `${options.hudPosition.top}px` : '16px';
+      hudFrame.style.left =
+        options.hudPosition?.left != null ? `${options.hudPosition.left}px` : 'auto';
+      hudFrame.style.right = options.hudPosition ? 'auto' : '16px';
+      hudFrame.style.borderRadius = '16px';
+
+      window.addEventListener('message', (event) => {
+        const msg = event.data;
+        if (!msg || msg.source !== 'cwv-live-hud') return;
+        if (msg.type === 'HUD_READY') {
+          sendHudState();
+          return;
+        }
+        if (msg.type === 'HUD_CLOSE') {
+          safeSendMessage({ type: 'DEACTIVATE_FOR_TAB' });
+          safeSendMessage({ type: 'TOGGLE_THROTTLING', enabled: false });
+          throttled = false;
+          hideHUD();
+          return;
+        }
+        if (msg.type === 'HUD_OPTIONS_EXPANDED') {
+          saveOptions({ hudOptionsExpanded: msg.expanded === true });
+          return;
+        }
+        if (msg.type === 'HUD_SET_OPTION') {
+          saveOptions((msg.partial ?? {}) as Partial<OptionsState>);
+          return;
+        }
+        if (msg.type === 'HUD_TOGGLE_THROTTLING') {
+          const enabled = msg.enabled === true;
+          safeSendMessage({ type: 'TOGGLE_THROTTLING', enabled });
+          throttled = enabled;
+          saveOptions({ throttlingEnabled: enabled });
+          sendHudState();
+          return;
+        }
+      });
+
+      document.documentElement.appendChild(hudFrame);
+      hudRoot = document.createElement('div'); // placeholder for legacy paths
+      sendHudState();
     }
 
     function showHUD() {
       ensureHUD();
-      if (hudRoot) updateHUD(hudRoot, currentMetrics, { active: overlayActive, throttled, options });
+      sendHudState();
       browser.runtime
         .sendMessage({ type: 'GET_TAB_STATE' })
         .then((res) => {
@@ -148,13 +186,15 @@ export default defineContentScript({
           if (!r || r.ok !== true) return;
           overlayActive = r.active === true;
           throttled = r.throttled === true;
-          if (hudRoot) updateHUD(hudRoot, {}, { active: overlayActive, throttled });
+          sendHudState();
         })
         .catch(() => {});
     }
 
     function hideHUD() {
-      destroyHUD();
+      hudFrame?.remove();
+      hudFrame = null;
+      destroyHUD(); // legacy cleanup (no-op if not present)
       hudRoot = null;
     }
 
@@ -178,7 +218,7 @@ export default defineContentScript({
       destroyCLSViz();
       destroyINPViz();
       lastLCPElement = null;
-      if (hudRoot) updateHUD(hudRoot, {}, { active: overlayActive });
+      sendHudState();
     }
 
     function sendToBackground(metrics: Partial<MetricsState>) {
@@ -224,7 +264,7 @@ export default defineContentScript({
           break;
       }
       if (hudRoot && state && ['LCP', 'INP', 'CLS'].includes(name)) {
-        updateHUD(hudRoot, { [name]: state });
+        sendHudState();
       }
       if (['LCP', 'INP', 'CLS'].includes(name)) {
         sendToBackground(currentMetrics);
@@ -254,7 +294,7 @@ export default defineContentScript({
         const next = (changes[STORAGE_KEY].newValue ?? {}) as Partial<OptionsState>;
         options = { ...options, ...next };
         applyOptions(options);
-        if (hudRoot) updateHUD(hudRoot, {}, { options });
+        sendHudState();
       }
     });
 

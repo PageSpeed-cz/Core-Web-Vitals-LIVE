@@ -144,8 +144,9 @@ export default defineBackground(() => {
   browser.action.onClicked.addListener((tab) => {
     const tabId = tab.id;
     if (tabId == null) return;
-    // Click-to-start: show HUD and activate overlay+visualizations for this tab.
+    // Click-to-start: remember tab as active, activate overlays, show HUD.
     // Closing the HUD deactivates everything (see content script onClose).
+    activeOverlayTabs.add(tabId);
     browser.tabs.sendMessage(tabId, { type: 'ACTIVATE' }).catch(() => {});
     browser.tabs.sendMessage(tabId, { type: 'SHOW_HUD' }).catch(() => {});
   });

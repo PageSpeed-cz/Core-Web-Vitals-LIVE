@@ -11,7 +11,13 @@ export default defineConfig({
     },
     web_accessible_resources: [
       {
-        resources: ['fonts/*.woff2', 'fonts/licenses/*.txt'],
+        resources: [
+          'fonts/*.woff2',
+          'fonts/licenses/*.txt',
+          'hud-frame.html',
+          'hud-frame.js',
+          'hud-frame.css',
+        ],
         matches: ['<all_urls>'],
       },
     ],
