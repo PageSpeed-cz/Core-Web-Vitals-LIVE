@@ -13,7 +13,7 @@ body {
 }
 
 #root {
-  width: 392px;
+  width: 400px;
   font-family: "Mona Sans Variable", system-ui, -apple-system, sans-serif;
 }
 
@@ -35,8 +35,8 @@ body {
 
 .cwv-live-hud {
   box-sizing: border-box;
-  width: 392px;
-  padding: 16px 22px;
+  width: 400px;
+  padding: 20px;
   border-radius: 16px;
   background: rgba(0, 0, 0, 0.86);
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -87,9 +87,10 @@ body {
   font-family: "Special Gothic Expanded One", "Mona Sans Variable", system-ui, -apple-system, sans-serif;
   font-weight: 400;
   font-size: 14px;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.95);
+  white-space: nowrap;
 }
 
 .cwv-live-iconbtn {
@@ -295,7 +296,7 @@ body {
 }
 
 .cwv-live-footer {
-  margin-top: 16px;
+  margin-top: 20px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -366,11 +367,11 @@ body {
 
 @media (max-width: 480px) {
   #root {
-    width: 280px;
+    width: 320px;
   }
   .cwv-live-hud {
-    width: 280px;
-    padding: 10px 14px;
+    width: 320px;
+    padding: 16px;
     font-size: 12px;
   }
   .cwv-live-name,

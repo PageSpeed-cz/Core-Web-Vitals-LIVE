@@ -109,6 +109,10 @@ export default defineContentScript({
       applyOptions(options);
     }
 
+    function isHudOpen(): boolean {
+      return !!(hudFrame || hudUsingLegacyDom);
+    }
+
     function sendHudState() {
       if (hudUsingLegacyDom) {
         if (!hudRoot) return;
@@ -129,6 +133,7 @@ export default defineContentScript({
       }
 
       if (!hudFrame || !hudFrame.contentWindow) return;
+      // If the iframe isn't ready yet, we'll send state on HUD_READY.
       if (!hudFrameReady) return;
       hudFrame.contentWindow.postMessage(
         {
@@ -177,7 +182,7 @@ export default defineContentScript({
       hudFrame.src = browser.runtime.getURL('/hud-frame.html' as any);
       hudFrame.style.border = '0';
       hudFrame.style.background = 'transparent';
-      hudFrame.style.width = '392px';
+      hudFrame.style.width = '400px';
       hudFrame.style.height = '1px'; // will be resized from iframe
       hudFrame.style.pointerEvents = 'auto';
       hudFrame.style.borderRadius = '16px';
@@ -231,6 +236,9 @@ export default defineContentScript({
           pendingLeft = rect.left;
           pendingTop = rect.top;
           dragging = true;
+          // While dragging, don't let the iframe capture page interactions as "INP on the page".
+          if (hudFrame) hudFrame.style.pointerEvents = 'none';
+          hudWrap.style.opacity = '0';
 
           ghost = document.createElement('div');
           ghost.id = 'cwv-live-hud-ghost';
@@ -277,6 +285,8 @@ export default defineContentScript({
             cancelAnimationFrame(raf);
             raf = 0;
           }
+          if (hudFrame) hudFrame.style.pointerEvents = 'auto';
+          hudWrap.style.opacity = '1';
           hudWrap.style.right = 'auto';
           hudWrap.style.left = `${pendingLeft}px`;
           hudWrap.style.top = `${pendingTop}px`;
@@ -468,7 +478,7 @@ export default defineContentScript({
           currentMetrics.TTFB = state;
           break;
       }
-      if (hudRoot && state && ['LCP', 'INP', 'CLS'].includes(name)) {
+      if (isHudOpen() && state && ['LCP', 'INP', 'CLS'].includes(name)) {
         sendHudState();
       }
       if (['LCP', 'INP', 'CLS'].includes(name)) {
