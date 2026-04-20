@@ -311,10 +311,12 @@ ${fontCss()}
   font-family: inherit;
   font-size: 13px;
   font-weight: 600;
+  outline: none;
 }
 .${HUD_ID} .${PREFIX}-options-toggle:hover {
   background: rgba(255, 255, 255, 0.06);
 }
+.${HUD_ID} .${PREFIX}-options-toggle:focus { outline: none; }
 .${HUD_ID} .${PREFIX}-chev {
   opacity: 0.8;
   transition: transform 0.2s ease;
@@ -360,6 +362,7 @@ ${fontCss()}
   border-radius: 10px;
   background: rgba(0,0,0,0.22);
   border: 1px solid rgba(255,255,255,0.10);
+  color: rgba(255, 255, 255, 0.92);
 }
 .${HUD_ID} .${PREFIX}-opt-row + .${PREFIX}-opt-row { margin-top: 6px; }
 .${HUD_ID} .${PREFIX}-opt-label {
@@ -422,6 +425,12 @@ ${fontCss()}
 .${HUD_ID} .${PREFIX}-footer {
   margin-top: 12px;
   display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+}
+.${HUD_ID} .${PREFIX}-footer-links {
+  display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
   gap: 10px;
@@ -437,6 +446,7 @@ ${fontCss()}
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  outline: none;
 }
 .${HUD_ID} .${PREFIX}-footer a:hover {
   color: rgba(255,255,255,0.95);
@@ -449,18 +459,36 @@ ${fontCss()}
   color: rgba(255, 255, 255, 0.95);
 }
 
-.${HUD_ID} .${PREFIX}-footer a.${PREFIX}-primary .${PREFIX}-psmark {
+.${HUD_ID} .${PREFIX}-byline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255,255,255,0.55);
+  font-weight: 600;
+  font-size: 12px;
+  text-decoration: none;
+}
+.${HUD_ID} .${PREFIX}-byline:hover {
+  color: rgba(255,255,255,0.95);
+  text-decoration: underline;
+}
+.${HUD_ID} .${PREFIX}-byline:hover .${PREFIX}-psmark {
   color: #FF00AA;
+}
+.${HUD_ID} .${PREFIX}-byline-text {
+  text-transform: none;
+  letter-spacing: 0.01em;
 }
 
 .${HUD_ID} .${PREFIX}-psmark {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  color: rgba(255,255,255,0.55);
 }
 .${HUD_ID} .${PREFIX}-psmark svg {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   display: block;
 }
 
@@ -471,6 +499,9 @@ ${fontCss()}
   outline-offset: 3px;
   border-radius: 10px;
 }
+
+.${HUD_ID} .${PREFIX}-iconbtn:focus { outline: none; }
+.${HUD_ID} .${PREFIX}-footer a:focus { outline: none; }
 `;
 
 let state: Partial<MetricsState> = {};
@@ -656,11 +687,17 @@ export function createHUD(next: { callbacks: HudCallbacks; ui: HudUIState }): HT
   const footer = document.createElement('div');
   footer.className = `${PREFIX}-footer`;
   footer.innerHTML = `
-    <a class="${PREFIX}-primary" href="${TEST_INSIGHTS_URL}" target="_blank" rel="noopener"><span class="${PREFIX}-psmark" aria-hidden="true">${PAGESPEED_MARK_SVG}</span>&nbsp;Test your site speed</a>
-    <span class="${PREFIX}-sep">\u2014</span>
-    <a href="${EXTENSION_HOME_URL}" target="_blank" rel="noopener">Home</a>
-    <span class="${PREFIX}-sep">\u2014</span>
-    <a href="${PRIVACY_POLICY_PAGE_URL}" target="_blank" rel="noopener">Privacy</a>
+    <div class="${PREFIX}-footer-links">
+      <a class="${PREFIX}-primary" href="${TEST_INSIGHTS_URL}" target="_blank" rel="noopener">Test your site speed</a>
+      <span class="${PREFIX}-sep">\u2014</span>
+      <a href="${EXTENSION_HOME_URL}" target="_blank" rel="noopener">Home</a>
+      <span class="${PREFIX}-sep">\u2014</span>
+      <a href="${PRIVACY_POLICY_PAGE_URL}" target="_blank" rel="noopener">Privacy</a>
+    </div>
+    <a class="${PREFIX}-byline" href="${LOGO_URL}" target="_blank" rel="noopener">
+      <span class="${PREFIX}-psmark" aria-hidden="true">${PAGESPEED_MARK_SVG}</span>
+      <span class="${PREFIX}-byline-text">brought to you by pagespeed.one</span>
+    </a>
   `;
   wrap.appendChild(footer);
 
