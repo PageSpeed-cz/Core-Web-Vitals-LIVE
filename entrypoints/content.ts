@@ -169,9 +169,11 @@ export default defineContentScript({
       hudWrap.style.borderRadius = '16px';
       hudWrap.style.boxShadow = '0 16px 44px rgba(0,0,0,0.55)';
       hudWrap.style.border = '0';
-      hudWrap.style.background = 'rgba(0,0,0,0.01)'; // enable backdrop-filter
-      (hudWrap.style as any).backdropFilter = 'blur(26px) saturate(1.35)';
-      (hudWrap.style as any).webkitBackdropFilter = 'blur(26px) saturate(1.35)';
+      // Keep the wrapper visually neutral. Backdrop blur on the host page can cause
+      // expensive repaints and (on some sites) contribute to layout instability while dragging.
+      hudWrap.style.background = 'transparent';
+      hudWrap.style.isolation = 'isolate';
+      (hudWrap.style as any).contain = 'layout paint style';
       hudWrap.style.willChange = 'transform';
       hudWrap.style.top = options.hudPosition?.top != null ? `${options.hudPosition.top}px` : '16px';
       hudWrap.style.left = options.hudPosition?.left != null ? `${options.hudPosition.left}px` : 'auto';

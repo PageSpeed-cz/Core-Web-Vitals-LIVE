@@ -125,13 +125,16 @@ function showCLSOverlay(entry: LayoutShiftEntry): void {
   for (const source of sources) {
     const rect = source.currentRect;
     if (rect.width === 0 || rect.height === 0) continue;
+    if (isLikelyExtensionInducedSource(source)) continue;
 
     const el = document.createElement('div');
     el.className = `${PREFIX}-overlay`;
-    el.style.left = `${rect.left}px`;
-    el.style.top = `${rect.top}px`;
+    // Use transform positioning to avoid contributing additional layout shifts.
+    el.style.left = '0px';
+    el.style.top = '0px';
     el.style.width = `${rect.width}px`;
     el.style.height = `${rect.height}px`;
+    el.style.transform = `translate(${rect.left}px, ${rect.top}px)`;
     el.innerHTML = `<span class="${PREFIX}-label">${labelInner}</span>`;
     document.body.appendChild(el);
 
@@ -140,6 +143,61 @@ function showCLSOverlay(entry: LayoutShiftEntry): void {
     });
     setTimeout(() => el.remove(), FADE_MS + 100);
   }
+}
+
+function rectArea(r: DOMRectReadOnly): number {
+  return Math.max(0, r.width) * Math.max(0, r.height);
+}
+
+function intersectArea(a: DOMRectReadOnly, b: DOMRectReadOnly): number {
+  const left = Math.max(a.left, b.left);
+  const top = Math.max(a.top, b.top);
+  const right = Math.min(a.left + a.width, b.left + b.width);
+  const bottom = Math.min(a.top + a.height, b.top + b.height);
+  const w = Math.max(0, right - left);
+  const h = Math.max(0, bottom - top);
+  return w * h;
+}
+
+function extensionHudRects(): DOMRect[] {
+  const ids = ['cwv-live-hud-wrap', 'cwv-live-hud-frame', 'cwv-live-hud-ghost', 'cwv-live-hud'];
+  const rects: DOMRect[] = [];
+  for (const id of ids) {
+    const el = document.getElementById(id);
+    if (!el) continue;
+    rects.push(el.getBoundingClientRect());
+  }
+  return rects;
+}
+
+function isLikelyExtensionInducedSource(source: {
+  node?: Node | null;
+  previousRect: DOMRectReadOnly;
+  currentRect: DOMRectReadOnly;
+}): boolean {
+  const node = source.node;
+  if (node && node instanceof Element) {
+    if (
+      node.closest('#cwv-live-hud-wrap') ||
+      node.closest('#cwv-live-hud-frame') ||
+      node.closest('#cwv-live-hud-ghost') ||
+      node.closest('#cwv-live-hud')
+    ) {
+      return true;
+    }
+  }
+
+  const r = source.currentRect;
+  const area = rectArea(r);
+  if (area <= 0) return false;
+
+  for (const hr of extensionHudRects()) {
+    const ia = intersectArea(r, hr);
+    // If the shifted region largely coincides with our HUD footprint, treat it as extension noise.
+    if (ia / area > 0.35) return true;
+  }
+
+  return false;
 }
 
 export function destroyCLSViz(): void {
