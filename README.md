@@ -4,7 +4,7 @@
 
 A Chrome (and Chromium) extension that shows real-time [Core Web Vitals](https://web.dev/vitals/) (LCP, INP, CLS) on any page, with a game-like HUD and visual overlays so you can see exactly what’s hurting your metrics.
 
-![Core Web Vitals Live — game-style HUD with LCP, INP, and CLS life bars on a live page](assets/core-web-vitals-live-2.jpg)
+![Core Web Vitals Live — game-style HUD with LCP, INP, and CLS life bars on a live page](assets/cwv-live-2.png)
 
 ## Features
 
