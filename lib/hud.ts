@@ -456,7 +456,7 @@ ${fontCss()}
   opacity: 0.35;
 }
 .${HUD_ID} .${PREFIX}-footer a.${PREFIX}-primary {
-  color: rgba(255, 255, 255, 0.95);
+  color: rgba(255,255,255,0.78);
 }
 
 .${HUD_ID} .${PREFIX}-byline {
@@ -696,7 +696,7 @@ export function createHUD(next: { callbacks: HudCallbacks; ui: HudUIState }): HT
     </div>
     <a class="${PREFIX}-byline" href="${LOGO_URL}" target="_blank" rel="noopener">
       <span class="${PREFIX}-psmark" aria-hidden="true">${PAGESPEED_MARK_SVG}</span>
-      <span class="${PREFIX}-byline-text">brought to you by pagespeed.one</span>
+      <span class="${PREFIX}-byline-text">Brought to you by PageSpeed.ONE</span>
     </a>
   `;
   wrap.appendChild(footer);

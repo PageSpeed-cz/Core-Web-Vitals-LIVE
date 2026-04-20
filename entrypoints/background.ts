@@ -144,7 +144,9 @@ export default defineBackground(() => {
   browser.action.onClicked.addListener((tab) => {
     const tabId = tab.id;
     if (tabId == null) return;
-    // Always show the HUD on click. Enabled/disabled state is controlled inside the HUD.
+    // Click-to-start: show HUD and activate overlay+visualizations for this tab.
+    // Closing the HUD deactivates everything (see content script onClose).
+    browser.tabs.sendMessage(tabId, { type: 'ACTIVATE' }).catch(() => {});
     browser.tabs.sendMessage(tabId, { type: 'SHOW_HUD' }).catch(() => {});
   });
 
