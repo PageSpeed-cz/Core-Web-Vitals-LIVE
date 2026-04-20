@@ -7,7 +7,7 @@ import { initMetrics, formatLCP, formatINP, formatCLS, formatFCP, formatTTFB } f
 import type { Metric } from '../lib/metrics';
 import type { MetricsState, MetricState, OptionsState } from '../lib/types';
 import { DEFAULT_OPTIONS } from '../lib/types';
-import { destroyHUD } from '../lib/hud';
+import { createHUD, destroyHUD, updateHUD } from '../lib/hud';
 import { initCLSViz, destroyCLSViz } from '../lib/cls-viz';
 import { initINPViz, destroyINPViz } from '../lib/inp-viz';
 import { showLCPElement, destroyLCPViz } from '../lib/lcp-viz';
@@ -37,12 +37,15 @@ export default defineContentScript({
     let overlayActive = false;
     let hudRoot: HTMLElement | null = null;
     let hudFrame: HTMLIFrameElement | null = null;
+    let hudFrameReady = false;
+    let hudUsingLegacyDom = false;
     let teardownCLS: (() => void) | null = null;
     let teardownINP: (() => void) | null = null;
     let lastLCPElement: Element | null = null;
     const currentMetrics: Partial<MetricsState> = {};
     let extensionContextInvalidated = false;
     let throttled = false;
+    let hudReadyTimeout: number | null = null;
 
     function safeSendMessage(message: unknown) {
       if (extensionContextInvalidated) return;
@@ -102,7 +105,26 @@ export default defineContentScript({
     }
 
     function sendHudState() {
+      if (hudUsingLegacyDom) {
+        if (!hudRoot) return;
+        updateHUD(
+          hudRoot,
+          {
+            LCP: currentMetrics.LCP,
+            INP: currentMetrics.INP,
+            CLS: currentMetrics.CLS,
+          },
+          {
+            active: overlayActive,
+            throttled,
+            options,
+          }
+        );
+        return;
+      }
+
       if (!hudFrame || !hudFrame.contentWindow) return;
+      if (!hudFrameReady) return;
       hudFrame.contentWindow.postMessage(
         {
           source: 'cwv-live-parent',
@@ -122,7 +144,7 @@ export default defineContentScript({
     }
 
     function ensureHUD() {
-      if (hudFrame) return;
+      if (hudFrame || hudUsingLegacyDom) return;
       hudFrame = document.createElement('iframe');
       hudFrame.id = 'cwv-live-hud-frame';
       hudFrame.src = browser.runtime.getURL('/hud-frame.html' as any);
@@ -138,11 +160,17 @@ export default defineContentScript({
         options.hudPosition?.left != null ? `${options.hudPosition.left}px` : 'auto';
       hudFrame.style.right = options.hudPosition ? 'auto' : '16px';
       hudFrame.style.borderRadius = '16px';
+      hudFrameReady = false;
 
       window.addEventListener('message', (event) => {
         const msg = event.data;
         if (!msg || msg.source !== 'cwv-live-hud') return;
         if (msg.type === 'HUD_READY') {
+          hudFrameReady = true;
+          if (hudReadyTimeout != null) {
+            window.clearTimeout(hudReadyTimeout);
+            hudReadyTimeout = null;
+          }
           sendHudState();
           return;
         }
@@ -172,8 +200,46 @@ export default defineContentScript({
       });
 
       document.documentElement.appendChild(hudFrame);
-      hudRoot = document.createElement('div'); // placeholder for legacy paths
-      sendHudState();
+
+      // If the iframe is blocked by CSP `frame-src` on the host page, it will never post HUD_READY.
+      // In that case, fall back to the legacy in-page HUD so users can still control the overlay.
+      hudReadyTimeout = window.setTimeout(() => {
+        if (hudFrameReady || !hudFrame) return;
+        // fallback
+        hudUsingLegacyDom = true;
+        try {
+          hudFrame.remove();
+        } catch {}
+        hudFrame = null;
+        hudRoot = createHUD({
+          callbacks: {
+            onToggleActive: (nextActive: boolean) => {
+              if (nextActive) safeSendMessage({ type: 'ACTIVATE_FOR_TAB' });
+              else safeSendMessage({ type: 'DEACTIVATE_FOR_TAB' });
+            },
+            onClose: () => {
+              safeSendMessage({ type: 'DEACTIVATE_FOR_TAB' });
+              safeSendMessage({ type: 'TOGGLE_THROTTLING', enabled: false });
+              throttled = false;
+              hideHUD();
+            },
+            onSetOptionsExpanded: (expanded: boolean) => saveOptions({ hudOptionsExpanded: expanded }),
+            onSetOption: (partial: Partial<OptionsState>) => saveOptions(partial),
+            onToggleThrottling: (enabled: boolean) => {
+              safeSendMessage({ type: 'TOGGLE_THROTTLING', enabled });
+              throttled = enabled;
+              saveOptions({ throttlingEnabled: enabled });
+            },
+            onSetPosition: (pos: { top: number; left: number }) => saveOptions({ hudPosition: pos }),
+          },
+          ui: {
+            active: overlayActive,
+            throttled,
+            options,
+          },
+        });
+        sendHudState();
+      }, 1200);
     }
 
     function showHUD() {
@@ -192,10 +258,16 @@ export default defineContentScript({
     }
 
     function hideHUD() {
+      if (hudReadyTimeout != null) {
+        window.clearTimeout(hudReadyTimeout);
+        hudReadyTimeout = null;
+      }
       hudFrame?.remove();
       hudFrame = null;
+      hudFrameReady = false;
       destroyHUD(); // legacy cleanup (no-op if not present)
       hudRoot = null;
+      hudUsingLegacyDom = false;
     }
 
     function activate() {
