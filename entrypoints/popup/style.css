@@ -1,9 +1,26 @@
 :root {
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  font-family: "Mona Sans Variable", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  font-weight: 500;
   font-size: 13px;
   line-height: 1.4;
   color: #1a1a3e;
   background: #fff;
+}
+
+@font-face {
+  font-family: "Mona Sans Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 900;
+  src: url("/fonts/mona-sans-latin-wght-normal.woff2") format("woff2-variations");
+}
+
+@font-face {
+  font-family: "Special Gothic Expanded One";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("/fonts/special-gothic-expanded-one-latin-400-normal.woff2") format("woff2");
 }
 
 body {
@@ -30,7 +47,8 @@ body {
 }
 
 h1 {
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  font-family: "Special Gothic Expanded One", "Mona Sans Variable", system-ui, -apple-system,
+    Segoe UI, Roboto, sans-serif;
   font-size: 15px;
   font-weight: 400;
   text-transform: uppercase;
@@ -69,7 +87,8 @@ h1 {
   border-top: 1px solid #eee;
 }
 .section-title {
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  font-family: "Special Gothic Expanded One", "Mona Sans Variable", system-ui, -apple-system,
+    Segoe UI, Roboto, sans-serif;
   font-size: 12px;
   font-weight: 400;
   text-transform: uppercase;
