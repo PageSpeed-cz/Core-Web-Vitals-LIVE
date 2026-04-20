@@ -145,8 +145,9 @@ ${fontCss()}
 }
 
 .${HUD_ID} .${PREFIX}-title {
-  font-family: "Mona Sans Variable", system-ui, -apple-system, sans-serif;
-  font-weight: 500;
+  font-family: "Special Gothic Expanded One", "Mona Sans Variable", system-ui, -apple-system,
+    sans-serif;
+  font-weight: 400;
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
