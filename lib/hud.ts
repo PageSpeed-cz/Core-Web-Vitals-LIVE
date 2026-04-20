@@ -15,6 +15,11 @@ const EXTENSION_HOME_URL = 'https://github.com/PageSpeed-cz/Core-Web-Vitals-LIVE
 
 const LOGO_SVG = `<svg viewBox="50 50 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M100 150C127.613 150 150 127.615 150 100C150 72.3849 127.613 50 100 50C72.387 50 50 72.3849 50 100C50 127.615 72.3849 150 100 150Z" fill="#FF00AA"/><path d="M90.9479 103.006L91.855 87.9079L117.152 89.3971L90.9479 103.006ZM129.954 92.1142C129.954 87.3428 128.408 83.5804 125.285 80.8591C122.16 78.1377 117.658 76.7611 111.744 76.7611H75.1232L70.9232 124.94H88.764L89.9069 111.468H108.689C115.24 111.468 120.447 109.721 124.246 106.261C128.042 102.8 129.958 98.0625 129.958 92.1163" fill="white"/></svg>`;
 
+// Heroicons (solid) — https://heroicons.com
+const ICON_POWER = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M11.983 1.659a.75.75 0 0 1 .425.964l-.652 1.957a7.252 7.252 0 1 1-3.512 0l-.652-1.957a.75.75 0 1 1 1.389-.463l.748 2.244a.75.75 0 0 1-.49.945 5.752 5.752 0 1 0 3.524 0 .75.75 0 0 1-.49-.945l.748-2.244a.75.75 0 0 1 .964-.425Z" clip-rule="evenodd" /><path d="M10 1.75a.75.75 0 0 1 .75.75v6a.75.75 0 0 1-1.5 0v-6A.75.75 0 0 1 10 1.75Z" /></svg>`;
+const ICON_X_CIRCLE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16ZM8.28 7.22a.75.75 0 0 1 1.06 0L10 7.94l.66-.72a.75.75 0 1 1 1.08 1.04L11.06 9l.68.74a.75.75 0 1 1-1.08 1.04L10 10.06l-.66.72a.75.75 0 0 1-1.08-1.04L8.94 9l-.68-.74a.75.75 0 0 1 .02-1.04Z" clip-rule="evenodd" /></svg>`;
+const ICON_CHEVRON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd" /></svg>`;
+
 function fontCss(): string {
   const mona = browser.runtime.getURL('/fonts/mona-sans-latin-wght-normal.woff2' as any);
   const special = browser.runtime.getURL('/fonts/special-gothic-expanded-one-latin-400-normal.woff2' as any);
@@ -98,15 +103,16 @@ ${fontCss()}
   font-weight: 500;
   font-size: 13px;
   line-height: 1.3;
-  min-width: 260px;
-  max-width: 340px;
+  width: 360px;
+  min-width: 360px;
+  max-width: 360px;
   padding: 14px 18px;
   border-radius: 16px;
-  background: rgba(16, 16, 36, 0.78);
-  backdrop-filter: blur(24px) saturate(1.5);
-  -webkit-backdrop-filter: blur(24px) saturate(1.5);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  background: rgba(0, 0, 0, 0.86);
+  backdrop-filter: blur(26px) saturate(1.35);
+  -webkit-backdrop-filter: blur(26px) saturate(1.35);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 16px 44px rgba(0,0,0,0.55);
   user-select: none;
   pointer-events: auto;
   color: rgba(255, 255, 255, 0.95);
@@ -147,7 +153,8 @@ ${fontCss()}
     sans-serif;
   font-weight: 400;
   font-size: 14px;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   color: rgba(255, 255, 255, 0.95);
 }
 
@@ -156,16 +163,25 @@ ${fontCss()}
   border: none;
   color: rgba(255, 255, 255, 0.6);
   cursor: pointer;
-  padding: 2px 8px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
   font-size: 16px;
   line-height: 1;
-  border-radius: 4px;
+  border-radius: 10px;
   font-family: "Mona Sans Variable", system-ui, sans-serif;
   font-weight: 500;
 }
 .${HUD_ID} .${PREFIX}-iconbtn:hover {
   color: rgba(255, 255, 255, 0.9);
   background: rgba(255, 255, 255, 0.08);
+}
+.${HUD_ID} .${PREFIX}-iconbtn svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+  margin: 0 auto;
+  preserveAspectRatio: xMidYMid meet;
 }
 
 .${HUD_ID} .${PREFIX}-header-right {
@@ -174,16 +190,13 @@ ${fontCss()}
   gap: 6px;
 }
 
-.${HUD_ID} .${PREFIX}-icon-onoff {
-  font-family: "Special Gothic Expanded One", "Mona Sans Variable", system-ui, -apple-system,
-    sans-serif;
-  font-weight: 400;
-  font-size: 14px;
-  letter-spacing: 0.06em;
-}
+.${HUD_ID} .${PREFIX}-icon-onoff { color: rgba(255, 255, 255, 0.85); }
+.${HUD_ID}.${PREFIX}-state-off .${PREFIX}-icon-onoff { color: rgba(255, 255, 255, 0.45); }
+.${HUD_ID} .${PREFIX}-icon-onoff.${PREFIX}-on { color: rgba(12, 206, 107, 0.95); }
 
 .${HUD_ID}.${PREFIX}-state-off {
-  opacity: 0.6;
+  /* Keep the HUD "black glass" even when inactive; only the on/off icon indicates state. */
+  opacity: 1;
 }
 
 .${HUD_ID} .${PREFIX}-row {
@@ -267,24 +280,32 @@ ${fontCss()}
   background: rgba(255, 255, 255, 0.1);
 }
 
+.${HUD_ID} .${PREFIX}-options-panel {
+  margin-top: 0;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
 .${HUD_ID} .${PREFIX}-options-toggle {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
   width: 100%;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: transparent;
+  border: none;
   color: rgba(255, 255, 255, 0.92);
-  padding: 8px 10px;
-  border-radius: 10px;
+  padding: 10px 12px;
+  border-radius: 0;
   cursor: pointer;
   font-family: inherit;
   font-size: 13px;
   font-weight: 600;
 }
 .${HUD_ID} .${PREFIX}-options-toggle:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.06);
 }
 .${HUD_ID} .${PREFIX}-chev {
   opacity: 0.8;
@@ -293,8 +314,13 @@ ${fontCss()}
 .${HUD_ID}.${PREFIX}-options-open .${PREFIX}-chev {
   transform: rotate(180deg);
 }
+.${HUD_ID} .${PREFIX}-chev svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+}
 .${HUD_ID} .${PREFIX}-options {
-  margin-top: 10px;
+  padding: 10px 12px 12px;
   display: none;
 }
 .${HUD_ID}.${PREFIX}-options-open .${PREFIX}-options {
@@ -303,6 +329,9 @@ ${fontCss()}
 
 .${HUD_ID} .${PREFIX}-opt-section {
   margin-top: 10px;
+}
+.${HUD_ID} .${PREFIX}-opt-section:first-child {
+  margin-top: 0;
 }
 .${HUD_ID} .${PREFIX}-opt-title {
   margin: 0 0 8px;
@@ -321,8 +350,8 @@ ${fontCss()}
   gap: 12px;
   padding: 8px 10px;
   border-radius: 10px;
-  background: rgba(0,0,0,0.15);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(0,0,0,0.22);
+  border: 1px solid rgba(255,255,255,0.10);
 }
 .${HUD_ID} .${PREFIX}-opt-row + .${PREFIX}-opt-row { margin-top: 6px; }
 .${HUD_ID} .${PREFIX}-opt-label {
@@ -336,29 +365,76 @@ ${fontCss()}
   opacity: 0.75;
   font-weight: 500;
 }
+/* Glow switch */
 .${HUD_ID} .${PREFIX}-switch {
   flex-shrink: 0;
+  position: relative;
+  width: 42px;
+  height: 26px;
 }
 .${HUD_ID} .${PREFIX}-switch input {
-  width: 18px;
-  height: 18px;
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  margin: 0;
+  cursor: pointer;
+}
+.${HUD_ID} .${PREFIX}-switch .${PREFIX}-track {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.14);
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+.${HUD_ID} .${PREFIX}-switch .${PREFIX}-thumb {
+  position: absolute;
+  top: 50%;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.9);
+  transition: left 0.18s ease, background 0.18s ease;
+}
+.${HUD_ID} .${PREFIX}-switch input:checked + .${PREFIX}-track {
+  background: rgba(12, 206, 107, 0.85);
+  border-color: rgba(12, 206, 107, 0.85);
+}
+.${HUD_ID} .${PREFIX}-switch input:checked + .${PREFIX}-track .${PREFIX}-thumb {
+  left: 19px;
+  background: rgba(255,255,255,0.95);
+}
+.${HUD_ID} .${PREFIX}-switch input:focus-visible + .${PREFIX}-track {
+  outline: 2px solid rgba(255,255,255,0.65);
+  outline-offset: 2px;
 }
 
-.${HUD_ID} .${PREFIX}-links {
-  margin-top: 10px;
+.${HUD_ID} .${PREFIX}-footer {
+  margin-top: 12px;
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 10px;
+  justify-content: center;
+  white-space: nowrap;
 }
-.${HUD_ID} .${PREFIX}-links a {
+.${HUD_ID} .${PREFIX}-footer a {
   color: rgba(255,255,255,0.78);
   text-decoration: none;
   font-weight: 600;
   font-size: 12px;
 }
-.${HUD_ID} .${PREFIX}-links a:hover {
+.${HUD_ID} .${PREFIX}-footer a:hover {
   color: rgba(255,255,255,0.95);
   text-decoration: underline;
+}
+.${HUD_ID} .${PREFIX}-footer .${PREFIX}-sep {
+  opacity: 0.35;
+}
+.${HUD_ID} .${PREFIX}-footer a.${PREFIX}-primary {
+  color: #FF00AA;
 }
 `;
 
@@ -391,8 +467,8 @@ function setHeaderState(root: HTMLElement) {
 
   const onoffBtn = root.querySelector(`[data-${PREFIX}-onoff]`) as HTMLButtonElement | null;
   if (onoffBtn) {
-    onoffBtn.textContent = uiState.active ? '1' : '0';
     onoffBtn.setAttribute('aria-label', uiState.active ? 'Turn off' : 'Turn on');
+    onoffBtn.classList.toggle(`${PREFIX}-on`, uiState.active);
   }
 
   const throttleInput = root.querySelector(`#${PREFIX}-throttle`) as HTMLInputElement | null;
@@ -439,8 +515,8 @@ export function createHUD(next: { callbacks: HudCallbacks; ui: HudUIState }): HT
       <span class="${PREFIX}-title">Core Web Vitals Live</span>
     </div>
     <div class="${PREFIX}-header-right">
-      <button type="button" class="${PREFIX}-iconbtn ${PREFIX}-icon-onoff" data-${PREFIX}-onoff aria-label="Turn on">0</button>
-      <button type="button" class="${PREFIX}-iconbtn" data-${PREFIX}-close aria-label="Close">\u00d7</button>
+      <button type="button" class="${PREFIX}-iconbtn ${PREFIX}-icon-onoff" data-${PREFIX}-onoff aria-label="Turn on">${ICON_POWER}</button>
+      <button type="button" class="${PREFIX}-iconbtn" data-${PREFIX}-close aria-label="Close">${ICON_X_CIRCLE}</button>
     </div>
   `;
   wrap.appendChild(header);
@@ -497,54 +573,75 @@ export function createHUD(next: { callbacks: HudCallbacks; ui: HudUIState }): HT
   divider1.className = `${PREFIX}-divider`;
   wrap.appendChild(divider1);
 
+  const optionsPanel = document.createElement('div');
+  optionsPanel.className = `${PREFIX}-options-panel`;
+
   const optionsToggle = document.createElement('button');
   optionsToggle.type = 'button';
   optionsToggle.className = `${PREFIX}-options-toggle`;
-  optionsToggle.innerHTML = `Show options <span class="${PREFIX}-chev">\u25be</span>`;
+  optionsToggle.innerHTML = `Show options <span class="${PREFIX}-chev">${ICON_CHEVRON}</span>`;
   optionsToggle.addEventListener('click', (e) => {
     e.stopPropagation();
     if (!callbacks || !uiState) return;
     const nextExpanded = !uiState.options.hudOptionsExpanded;
     callbacks.onSetOptionsExpanded(nextExpanded);
   });
-  wrap.appendChild(optionsToggle);
+  optionsPanel.appendChild(optionsToggle);
 
   const options = document.createElement('div');
   options.className = `${PREFIX}-options`;
   options.innerHTML = `
     <div class="${PREFIX}-opt-section">
-      <div class="${PREFIX}-opt-row">
+      <label class="${PREFIX}-opt-row">
         <div class="${PREFIX}-opt-label">
           <strong>Emulate slower device</strong>
           <div class="${PREFIX}-opt-desc">4\u00d7 CPU slowdown + Fast 4G network. A yellow browser bar will appear \u2014 this is normal and required for throttling.</div>
         </div>
-        <div class="${PREFIX}-switch"><input id="${PREFIX}-throttle" type="checkbox" /></div>
-      </div>
+        <div class="${PREFIX}-switch">
+          <input id="${PREFIX}-throttle" type="checkbox" />
+          <span class="${PREFIX}-track"><span class="${PREFIX}-thumb"></span></span>
+        </div>
+      </label>
     </div>
 
     <div class="${PREFIX}-opt-section">
-      <div class="${PREFIX}-opt-title">Visualizations</div>
       <label class="${PREFIX}-opt-row">
-        <div class="${PREFIX}-opt-label"><strong>CLS (layout shifts)</strong></div>
-        <div class="${PREFIX}-switch"><input id="${PREFIX}-cls" type="checkbox" /></div>
+        <div class="${PREFIX}-opt-label"><strong>Visualize CLS</strong></div>
+        <div class="${PREFIX}-switch">
+          <input id="${PREFIX}-cls" type="checkbox" />
+          <span class="${PREFIX}-track"><span class="${PREFIX}-thumb"></span></span>
+        </div>
       </label>
       <label class="${PREFIX}-opt-row">
-        <div class="${PREFIX}-opt-label"><strong>INP (interactions)</strong></div>
-        <div class="${PREFIX}-switch"><input id="${PREFIX}-inp" type="checkbox" /></div>
+        <div class="${PREFIX}-opt-label"><strong>Visualize INP</strong></div>
+        <div class="${PREFIX}-switch">
+          <input id="${PREFIX}-inp" type="checkbox" />
+          <span class="${PREFIX}-track"><span class="${PREFIX}-thumb"></span></span>
+        </div>
       </label>
       <label class="${PREFIX}-opt-row">
-        <div class="${PREFIX}-opt-label"><strong>LCP (largest content)</strong></div>
-        <div class="${PREFIX}-switch"><input id="${PREFIX}-lcp" type="checkbox" /></div>
+        <div class="${PREFIX}-opt-label"><strong>Visualize LCP</strong></div>
+        <div class="${PREFIX}-switch">
+          <input id="${PREFIX}-lcp" type="checkbox" />
+          <span class="${PREFIX}-track"><span class="${PREFIX}-thumb"></span></span>
+        </div>
       </label>
     </div>
 
-    <div class="${PREFIX}-links">
-      <a href="${TEST_INSIGHTS_URL}" target="_blank" rel="noopener">Test Your Site Speed</a>
-      <a href="${EXTENSION_HOME_URL}" target="_blank" rel="noopener">Extension Home</a>
-      <a href="${PRIVACY_POLICY_PAGE_URL}" target="_blank" rel="noopener">Privacy Policy</a>
-    </div>
   `;
-  wrap.appendChild(options);
+  optionsPanel.appendChild(options);
+  wrap.appendChild(optionsPanel);
+
+  const footer = document.createElement('div');
+  footer.className = `${PREFIX}-footer`;
+  footer.innerHTML = `
+    <a class="${PREFIX}-primary" href="${TEST_INSIGHTS_URL}" target="_blank" rel="noopener">Test your site speed</a>
+    <span class="${PREFIX}-sep">\u2014</span>
+    <a href="${EXTENSION_HOME_URL}" target="_blank" rel="noopener">Home</a>
+    <span class="${PREFIX}-sep">\u2014</span>
+    <a href="${PRIVACY_POLICY_PAGE_URL}" target="_blank" rel="noopener">Privacy</a>
+  `;
+  wrap.appendChild(footer);
 
   const throttleEl = options.querySelector(`#${PREFIX}-throttle`) as HTMLInputElement | null;
   throttleEl?.addEventListener('change', () => {
