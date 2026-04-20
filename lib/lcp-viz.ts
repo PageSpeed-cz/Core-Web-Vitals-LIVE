@@ -48,6 +48,8 @@ const STYLES = `
   position: fixed;
   pointer-events: none;
   z-index: ${Z_INDEX};
+  top: 0;
+  left: 0;
   border: 3px solid rgba(255, 0, 170, 0.8);
   border-radius: 6px;
   box-sizing: border-box;
@@ -96,8 +98,7 @@ function updatePosition(): void {
   if (!overlayEl || !currentElement) return;
   try {
     const rect = currentElement.getBoundingClientRect();
-    overlayEl.style.left = `${rect.left}px`;
-    overlayEl.style.top = `${rect.top}px`;
+    overlayEl.style.transform = `translate(${rect.left}px, ${rect.top}px)`;
     overlayEl.style.width = `${rect.width}px`;
     overlayEl.style.height = `${rect.height}px`;
   } catch {
