@@ -13,11 +13,12 @@ const LOGO_URL = 'https://pagespeed.one/en';
 const TEST_INSIGHTS_URL = 'https://pagespeed.one/en/app/insights';
 const EXTENSION_HOME_URL = 'https://github.com/PageSpeed-cz/Core-Web-Vitals-LIVE';
 
-const LOGO_SVG = `<svg viewBox="50 50 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M100 150C127.613 150 150 127.615 150 100C150 72.3849 127.613 50 100 50C72.387 50 50 72.3849 50 100C50 127.615 72.3849 150 100 150Z" fill="#FF00AA"/><path d="M90.9479 103.006L91.855 87.9079L117.152 89.3971L90.9479 103.006ZM129.954 92.1142C129.954 87.3428 128.408 83.5804 125.285 80.8591C122.16 78.1377 117.658 76.7611 111.744 76.7611H75.1232L70.9232 124.94H88.764L89.9069 111.468H108.689C115.24 111.468 120.447 109.721 124.246 106.261C128.042 102.8 129.958 98.0625 129.958 92.1163" fill="white"/></svg>`;
+const EXTENSION_MARK_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="64 64 512 512" fill="none" aria-hidden="true"><path fill="currentColor" d="M64 320C64 178.6 178.6 64 320 64C461.4 64 576 178.6 576 320C576 461.4 461.4 576 320 576C178.6 576 64 461.4 64 320zM384 416C384 389.1 367.5 366.1 344 356.7L344 184C344 170.7 333.3 160 320 160C306.7 160 296 170.7 296 184L296 356.7C272.5 366.2 256 389.2 256 416C256 451.3 284.7 480 320 480C355.3 480 384 451.3 384 416zM208 240C225.7 240 240 225.7 240 208C240 190.3 225.7 176 208 176C190.3 176 176 190.3 176 208C176 225.7 190.3 240 208 240zM192 320C192 302.3 177.7 288 160 288C142.3 288 128 302.3 128 320C128 337.7 142.3 352 160 352C177.7 352 192 337.7 192 320zM480 352C497.7 352 512 337.7 512 320C512 302.3 497.7 288 480 288C462.3 288 448 302.3 448 320C448 337.7 462.3 352 480 352zM464 208C464 190.3 449.7 176 432 176C414.3 176 400 190.3 400 208C400 225.7 414.3 240 432 240C449.7 240 464 225.7 464 208z"/></svg>`;
+const PAGESPEED_MARK_SVG = `<svg viewBox="50 50 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M100 150C127.613 150 150 127.615 150 100C150 72.3849 127.613 50 100 50C72.387 50 50 72.3849 50 100C50 127.615 72.3849 150 100 150Z" fill="currentColor"/><path d="M90.9479 103.006L91.855 87.9079L117.152 89.3971L90.9479 103.006ZM129.954 92.1142C129.954 87.3428 128.408 83.5804 125.285 80.8591C122.16 78.1377 117.658 76.7611 111.744 76.7611H75.1232L70.9232 124.94H88.764L89.9069 111.468H108.689C115.24 111.468 120.447 109.721 124.246 106.261C128.042 102.8 129.958 98.0625 129.958 92.1163" fill="currentColor"/></svg>`;
 
 // Heroicons (outline) — per spec from user
 const ICON_POWER = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5.636 5.636a9 9 0 1 0 12.728 0M12 3v9" /></svg>`;
-const ICON_X_CIRCLE = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>`;
+const ICON_XMARK = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>`;
 const ICON_CHEVRON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd" /></svg>`;
 
 function fontCss(): string {
@@ -142,10 +143,11 @@ ${fontCss()}
   flex-shrink: 0;
   pointer-events: auto;
   cursor: pointer;
+  color: #FF00AA;
 }
 .${HUD_ID} .${PREFIX}-logo svg {
-  height: 13px;
-  width: 13px;
+  height: 18px;
+  width: 18px;
 }
 
 .${HUD_ID} .${PREFIX}-title {
@@ -442,6 +444,21 @@ ${fontCss()}
 .${HUD_ID} .${PREFIX}-footer a.${PREFIX}-primary {
   color: rgba(255, 255, 255, 0.95);
 }
+
+.${HUD_ID} .${PREFIX}-footer a.${PREFIX}-primary .${PREFIX}-psmark {
+  color: #FF00AA;
+}
+
+.${HUD_ID} .${PREFIX}-psmark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.${HUD_ID} .${PREFIX}-psmark svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
 `;
 
 let state: Partial<MetricsState> = {};
@@ -470,12 +487,6 @@ let uiState: HudUIState | null = null;
 function setHeaderState(root: HTMLElement) {
   if (!uiState) return;
   root.classList.toggle(`${PREFIX}-state-off`, !uiState.active);
-
-  const onoffBtn = root.querySelector(`[data-${PREFIX}-onoff]`) as HTMLButtonElement | null;
-  if (onoffBtn) {
-    onoffBtn.setAttribute('aria-label', uiState.active ? 'Turn off' : 'Turn on');
-    onoffBtn.classList.toggle(`${PREFIX}-on`, uiState.active);
-  }
 
   const throttleInput = root.querySelector(`#${PREFIX}-throttle`) as HTMLInputElement | null;
   if (throttleInput) throttleInput.checked = uiState.throttled;
@@ -517,12 +528,11 @@ export function createHUD(next: { callbacks: HudCallbacks; ui: HudUIState }): HT
   header.className = `${PREFIX}-header`;
   header.innerHTML = `
     <div class="${PREFIX}-header-left">
-      <a href="${LOGO_URL}" target="_blank" rel="noopener" class="${PREFIX}-logo" title="pagespeed.one">${LOGO_SVG}</a>
+      <span class="${PREFIX}-logo" aria-hidden="true">${EXTENSION_MARK_SVG}</span>
       <span class="${PREFIX}-title">Core Web Vitals Live</span>
     </div>
     <div class="${PREFIX}-header-right">
-      <button type="button" class="${PREFIX}-iconbtn ${PREFIX}-icon-onoff" data-${PREFIX}-onoff aria-label="Turn on">${ICON_POWER}</button>
-      <button type="button" class="${PREFIX}-iconbtn" data-${PREFIX}-close aria-label="Close">${ICON_X_CIRCLE}</button>
+      <button type="button" class="${PREFIX}-iconbtn" data-${PREFIX}-close aria-label="Close">${ICON_XMARK}</button>
     </div>
   `;
   wrap.appendChild(header);
@@ -561,13 +571,6 @@ export function createHUD(next: { callbacks: HudCallbacks; ui: HudUIState }): HT
     bars.appendChild(row);
   }
   wrap.appendChild(bars);
-
-  const onoffBtn = header.querySelector(`[data-${PREFIX}-onoff]`) as HTMLButtonElement | null;
-  onoffBtn?.addEventListener('click', (e) => {
-    e.stopPropagation();
-    if (!callbacks || !uiState) return;
-    callbacks.onToggleActive(!uiState.active);
-  });
 
   const closeBtn = header.querySelector(`[data-${PREFIX}-close]`) as HTMLButtonElement | null;
   closeBtn?.addEventListener('click', (e) => {
@@ -641,7 +644,7 @@ export function createHUD(next: { callbacks: HudCallbacks; ui: HudUIState }): HT
   const footer = document.createElement('div');
   footer.className = `${PREFIX}-footer`;
   footer.innerHTML = `
-    <a class="${PREFIX}-primary" href="${TEST_INSIGHTS_URL}" target="_blank" rel="noopener">Test your site speed</a>
+    <a class="${PREFIX}-primary" href="${TEST_INSIGHTS_URL}" target="_blank" rel="noopener"><span class="${PREFIX}-psmark" aria-hidden="true">${PAGESPEED_MARK_SVG}</span>&nbsp;Test your site speed</a>
     <span class="${PREFIX}-sep">\u2014</span>
     <a href="${EXTENSION_HOME_URL}" target="_blank" rel="noopener">Home</a>
     <span class="${PREFIX}-sep">\u2014</span>
