@@ -39,7 +39,7 @@ const state = {
 
 root.innerHTML = `
   <div class="${PREFIX}-hud">
-    <div class="${PREFIX}-header">
+    <div class="${PREFIX}-header" data-drag-handle>
       <div class="${PREFIX}-header-left">
         <span class="${PREFIX}-logo" aria-hidden="true">${EXTENSION_MARK_SVG}</span>
         <span class="${PREFIX}-title">Core Web Vitals Live</span>
@@ -133,6 +133,45 @@ root.innerHTML = `
 
 function post(type, payload = {}) {
   window.parent.postMessage({ source: 'cwv-live-hud', type, ...payload }, '*');
+}
+
+// Drag handle -> parent moves the iframe wrapper.
+{
+  const handle = root.querySelector('[data-drag-handle]');
+  let dragging = false;
+  let pointerId = null;
+
+  const onMove = (e) => {
+    if (!dragging) return;
+    post('HUD_DRAG_MOVE', { clientX: e.clientX, clientY: e.clientY });
+  };
+  const onUp = () => {
+    if (!dragging) return;
+    dragging = false;
+    try {
+      if (pointerId != null) handle.releasePointerCapture(pointerId);
+    } catch {}
+    pointerId = null;
+    post('HUD_DRAG_END');
+    handle.removeEventListener('pointermove', onMove);
+    handle.removeEventListener('pointerup', onUp);
+    handle.removeEventListener('pointercancel', onUp);
+  };
+
+  handle?.addEventListener('pointerdown', (e) => {
+    // Don't start drag when interacting with buttons inside the header.
+    if (e.target?.closest?.('button, a, input, label')) return;
+    dragging = true;
+    pointerId = e.pointerId;
+    try {
+      handle.setPointerCapture(pointerId);
+    } catch {}
+    post('HUD_DRAG_START', { clientX: e.clientX, clientY: e.clientY });
+    handle.addEventListener('pointermove', onMove);
+    handle.addEventListener('pointerup', onUp);
+    handle.addEventListener('pointercancel', onUp);
+    e.preventDefault();
+  });
 }
 
 root.querySelector('[data-close]')?.addEventListener('click', (e) => {
@@ -235,6 +274,28 @@ window.addEventListener('message', (event) => {
     render();
   }
 });
+
+// Report size to parent so it can resize the iframe and avoid scrollbars.
+{
+  const hud = root.querySelector(`.${PREFIX}-hud`);
+  let raf = 0;
+  const report = () => {
+    raf = 0;
+    if (!hud) return;
+    // scrollHeight is stable even with overflow hidden; add 1px buffer to avoid rounding scrollbars.
+    const h = Math.ceil(hud.scrollHeight) + 1;
+    const w = Math.ceil(hud.getBoundingClientRect().width) || 360;
+    post('HUD_SIZE', { width: w, height: h });
+  };
+
+  const ro = new ResizeObserver(() => {
+    if (raf) return;
+    raf = requestAnimationFrame(report);
+  });
+  if (hud) ro.observe(hud);
+  // Initial
+  report();
+}
 
 post('HUD_READY');
 render();

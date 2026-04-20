@@ -37,6 +37,7 @@ export default defineContentScript({
     let overlayActive = false;
     let hudRoot: HTMLElement | null = null;
     let hudFrame: HTMLIFrameElement | null = null;
+    let hudWrap: HTMLDivElement | null = null;
     let hudFrameReady = false;
     let hudUsingLegacyDom = false;
     let teardownCLS: (() => void) | null = null;
@@ -145,22 +146,35 @@ export default defineContentScript({
 
     function ensureHUD() {
       if (hudFrame || hudUsingLegacyDom) return;
+      hudWrap = document.createElement('div');
+      hudWrap.id = 'cwv-live-hud-wrap';
+      hudWrap.style.position = 'fixed';
+      hudWrap.style.zIndex = '2147483646';
+      hudWrap.style.pointerEvents = 'auto';
+      hudWrap.style.borderRadius = '16px';
+      hudWrap.style.boxShadow = '0 16px 44px rgba(0,0,0,0.55)';
+      hudWrap.style.border = '1px solid rgba(255,255,255,0.12)';
+      hudWrap.style.background = 'rgba(0,0,0,0.01)'; // enable backdrop-filter
+      (hudWrap.style as any).backdropFilter = 'blur(26px) saturate(1.35)';
+      (hudWrap.style as any).webkitBackdropFilter = 'blur(26px) saturate(1.35)';
+      hudWrap.style.top = options.hudPosition?.top != null ? `${options.hudPosition.top}px` : '16px';
+      hudWrap.style.left = options.hudPosition?.left != null ? `${options.hudPosition.left}px` : 'auto';
+      hudWrap.style.right = options.hudPosition ? 'auto' : '16px';
+
       hudFrame = document.createElement('iframe');
       hudFrame.id = 'cwv-live-hud-frame';
       hudFrame.src = browser.runtime.getURL('/hud-frame.html' as any);
-      hudFrame.style.position = 'fixed';
-      hudFrame.style.zIndex = '2147483646';
       hudFrame.style.border = '0';
       hudFrame.style.background = 'transparent';
       hudFrame.style.width = '360px';
-      hudFrame.style.height = '520px';
+      hudFrame.style.height = '1px'; // will be resized from iframe
       hudFrame.style.pointerEvents = 'auto';
-      hudFrame.style.top = options.hudPosition?.top != null ? `${options.hudPosition.top}px` : '16px';
-      hudFrame.style.left =
-        options.hudPosition?.left != null ? `${options.hudPosition.left}px` : 'auto';
-      hudFrame.style.right = options.hudPosition ? 'auto' : '16px';
       hudFrame.style.borderRadius = '16px';
+      hudFrame.style.overflow = 'hidden';
       hudFrameReady = false;
+      let dragOffsetX = 0;
+      let dragOffsetY = 0;
+      let dragging = false;
 
       window.addEventListener('message', (event) => {
         const msg = event.data;
@@ -172,6 +186,39 @@ export default defineContentScript({
             hudReadyTimeout = null;
           }
           sendHudState();
+          return;
+        }
+        if (msg.type === 'HUD_SIZE') {
+          const h = typeof msg.height === 'number' ? Math.max(1, Math.min(1000, msg.height)) : null;
+          const w = typeof msg.width === 'number' ? Math.max(240, Math.min(480, msg.width)) : null;
+          if (hudFrame && h != null) hudFrame.style.height = `${h}px`;
+          if (hudWrap && h != null) hudWrap.style.height = `${h}px`;
+          if (hudFrame && w != null) hudFrame.style.width = `${w}px`;
+          if (hudWrap && w != null) hudWrap.style.width = `${w}px`;
+          return;
+        }
+        if (msg.type === 'HUD_DRAG_START') {
+          if (!hudWrap) return;
+          const rect = hudWrap.getBoundingClientRect();
+          dragOffsetX = (msg.clientX ?? 0) - rect.left;
+          dragOffsetY = (msg.clientY ?? 0) - rect.top;
+          dragging = true;
+          return;
+        }
+        if (msg.type === 'HUD_DRAG_MOVE') {
+          if (!dragging || !hudWrap) return;
+          const left = Math.max(0, (msg.clientX ?? 0) - dragOffsetX);
+          const top = Math.max(0, (msg.clientY ?? 0) - dragOffsetY);
+          hudWrap.style.left = `${left}px`;
+          hudWrap.style.top = `${top}px`;
+          hudWrap.style.right = 'auto';
+          return;
+        }
+        if (msg.type === 'HUD_DRAG_END') {
+          dragging = false;
+          if (!hudWrap) return;
+          const rect = hudWrap.getBoundingClientRect();
+          saveOptions({ hudPosition: { top: Math.max(0, rect.top), left: Math.max(0, rect.left) } });
           return;
         }
         if (msg.type === 'HUD_CLOSE') {
@@ -199,7 +246,8 @@ export default defineContentScript({
         }
       });
 
-      document.documentElement.appendChild(hudFrame);
+      hudWrap.appendChild(hudFrame);
+      document.documentElement.appendChild(hudWrap);
 
       // If the iframe is blocked by CSP `frame-src` on the host page, it will never post HUD_READY.
       // In that case, fall back to the legacy in-page HUD so users can still control the overlay.
@@ -211,6 +259,10 @@ export default defineContentScript({
           hudFrame.remove();
         } catch {}
         hudFrame = null;
+        try {
+          hudWrap?.remove();
+        } catch {}
+        hudWrap = null;
         hudRoot = createHUD({
           callbacks: {
             onToggleActive: (nextActive: boolean) => {
@@ -264,6 +316,8 @@ export default defineContentScript({
       }
       hudFrame?.remove();
       hudFrame = null;
+      hudWrap?.remove();
+      hudWrap = null;
       hudFrameReady = false;
       destroyHUD(); // legacy cleanup (no-op if not present)
       hudRoot = null;
