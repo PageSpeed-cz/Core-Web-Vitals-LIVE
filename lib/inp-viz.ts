@@ -120,6 +120,7 @@ interface EventTimingEntry extends PerformanceEntry {
 
 let lastPointerX = 0;
 let lastPointerY = 0;
+let lastPointerTs = 0;
 let lastKeyTarget: Element | null = null;
 
 let inpVizSeenInteractions: Set<number> | null = null;
@@ -134,17 +135,77 @@ function trackPointer(): void {
       lastPointerX = e.clientX;
       lastPointerY = e.clientY;
     }
+    lastPointerTs = Date.now();
   };
   document.addEventListener('mousemove', update, { passive: true });
   document.addEventListener('touchmove', update, { passive: true });
   document.addEventListener('click', update, { passive: true });
 }
 
+function isEditableElement(el: Element): boolean {
+  if (el instanceof HTMLInputElement) return !el.disabled && !el.readOnly;
+  if (el instanceof HTMLTextAreaElement) return !el.disabled && !el.readOnly;
+  // Covers contenteditable containers and rich editors
+  if ((el as HTMLElement).isContentEditable) return true;
+  return false;
+}
+
+function isDefinitelyNotInteractive(el: Element): boolean {
+  return el === document.documentElement || el === document.body;
+}
+
+function isInteractiveElement(el: Element): boolean {
+  if (isDefinitelyNotInteractive(el)) return false;
+  if (isEditableElement(el)) return true;
+
+  // Native interactive elements
+  if (el instanceof HTMLButtonElement) return !el.disabled;
+  if (el instanceof HTMLAnchorElement) return !!el.href;
+  if (el instanceof HTMLSelectElement) return !el.disabled;
+  if (el instanceof HTMLOptionElement) return !el.disabled;
+  if (el instanceof HTMLLabelElement) return true;
+  if (el instanceof HTMLDetailsElement) return true;
+  // Some TS lib DOM versions don't include HTMLSummaryElement type
+  if (el.tagName.toLowerCase() === 'summary') return true;
+
+  // ARIA roles often used for div-button UIs
+  const role = (el.getAttribute('role') || '').toLowerCase();
+  if (role === 'button' || role === 'link' || role === 'menuitem' || role === 'tab') return true;
+
+  // Explicit click handlers (best-effort signal)
+  if ((el as HTMLElement).onclick) return true;
+  if (el.hasAttribute('onclick')) return true;
+
+  // Focusable elements
+  const tabIndex = (el as HTMLElement).tabIndex;
+  if (typeof tabIndex === 'number' && tabIndex >= 0) return true;
+
+  return false;
+}
+
+function findInteractiveTarget(start: Element | null): Element | null {
+  let el: Element | null = start;
+  while (el) {
+    if (isInteractiveElement(el)) return el;
+    if (isDefinitelyNotInteractive(el)) return null;
+    el = el.parentElement;
+  }
+  return null;
+}
+
 function trackKeyboard(): void {
   document.addEventListener('keydown', () => {
     const active = document.activeElement;
-    if (active && active !== document.body && active !== document.documentElement) {
+    if (
+      active &&
+      active !== document.body &&
+      active !== document.documentElement &&
+      isEditableElement(active)
+    ) {
       lastKeyTarget = active;
+    } else {
+      // Avoid treating global/window-level keys (screenshots, OS shortcuts) as page typing.
+      lastKeyTarget = null;
     }
   }, { passive: true, capture: true });
 }
@@ -191,20 +252,22 @@ function showOverlay(duration: number, target: Element | null): void {
   const labelHTML = makeLabelHTML(`${Math.round(duration)}ms`, color);
 
   // 1st: element reported by PerformanceEventTiming
-  if (target && tryShowBox(labelHTML, target)) return;
+  const interactiveTarget = findInteractiveTarget(target);
+  if (interactiveTarget && tryShowBox(labelHTML, interactiveTarget)) return;
 
   // 2nd: last focused element captured at keydown time (for keyboard interactions
   //      where PerformanceEventTiming.target may be null or already detached)
-  if (lastKeyTarget && lastKeyTarget.isConnected && !isInsideHUD(lastKeyTarget) && tryShowBox(labelHTML, lastKeyTarget)) return;
+  if (
+    lastKeyTarget &&
+    lastKeyTarget.isConnected &&
+    !isInsideHUD(lastKeyTarget) &&
+    tryShowBox(labelHTML, lastKeyTarget)
+  ) {
+    return;
+  }
 
-  // 3rd: pointer-anchored badge fallback
-  const badge = document.createElement('div');
-  badge.className = `${PREFIX}-badge`;
-  badge.style.left = `${lastPointerX}px`;
-  badge.style.top = `${lastPointerY}px`;
-  badge.innerHTML = `<span class="${PREFIX}-label">${labelHTML}</span>`;
-  document.documentElement.appendChild(badge);
-  fadeAndRemove(badge);
+  // No pointer badge fallback: it creates a lot of noise (often no meaningful target).
+  // It's better to show nothing than misattribute INP to "the page".
 }
 
 export function initINPViz(): () => void {
