@@ -177,7 +177,7 @@ export default defineContentScript({
       hudFrame.src = browser.runtime.getURL('/hud-frame.html' as any);
       hudFrame.style.border = '0';
       hudFrame.style.background = 'transparent';
-      hudFrame.style.width = '360px';
+      hudFrame.style.width = '392px';
       hudFrame.style.height = '1px'; // will be resized from iframe
       hudFrame.style.pointerEvents = 'auto';
       hudFrame.style.borderRadius = '16px';

@@ -13,7 +13,7 @@ body {
 }
 
 #root {
-  width: 360px;
+  width: 392px;
   font-family: "Mona Sans Variable", system-ui, -apple-system, sans-serif;
 }
 
@@ -35,8 +35,8 @@ body {
 
 .cwv-live-hud {
   box-sizing: border-box;
-  width: 360px;
-  padding: 14px 18px;
+  width: 392px;
+  padding: 16px 22px;
   border-radius: 16px;
   background: rgba(0, 0, 0, 0.86);
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -53,8 +53,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
-  padding-bottom: 8px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   cursor: grab;
   user-select: none;
@@ -163,7 +163,7 @@ body {
 }
 
 .cwv-live-divider {
-  margin: 12px 0;
+  margin: 14px 0;
   height: 1px;
   background: rgba(255, 255, 255, 0.1);
 }
@@ -295,10 +295,10 @@ body {
 }
 
 .cwv-live-footer {
-  margin-top: 12px;
+  margin-top: 16px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   align-items: center;
 }
 .cwv-live-footer-links {
