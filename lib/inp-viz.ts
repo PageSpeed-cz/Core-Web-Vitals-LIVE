@@ -23,10 +23,30 @@ function makeLabelHTML(valueText: string, valueColor: string): string {
   return `INP: <span style="font-weight:600;font-variant-numeric:tabular-nums;text-transform:none;color:${valueColor}">${valueText}</span>`;
 }
 
+const MONA_FONT_URL = browser.runtime.getURL('/fonts/mona-sans-latin-wght-normal.woff2' as any);
+const SPECIAL_FONT_URL = browser.runtime.getURL(
+  '/fonts/special-gothic-expanded-one-latin-400-normal.woff2' as any
+);
+
 // 25% opacity, 3px stripe / 6px period → 50% area coverage
 const HATCH = 'rgba(255, 0, 170, 0.25)';
 
 const STYLES = `
+@font-face {
+  font-family: "Mona Sans Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 900;
+  src: url("${MONA_FONT_URL}") format("woff2-variations");
+}
+@font-face {
+  font-family: "Special Gothic Expanded One";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("${SPECIAL_FONT_URL}") format("woff2");
+}
+
 .${PREFIX}-overlay {
   position: fixed;
   pointer-events: none;
@@ -62,9 +82,9 @@ const STYLES = `
   left: 50%;
   transform: translateX(-50%);
   margin-top: 4px;
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: "Mona Sans Variable", system-ui, -apple-system, sans-serif;
   font-size: 12px;
-  font-weight: 400;
+  font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.03em;
   color: rgba(255, 255, 255, 0.9);
