@@ -6,6 +6,9 @@ export default defineConfig({
     name: 'Core Web Vitals Live',
     description: "See your website's performance. Live. Real-time LCP, INP, and CLS metrics with visual overlays.",
     permissions: ['tabs', 'storage', 'activeTab', 'debugger'],
+    action: {
+      default_title: 'Core Web Vitals Live',
+    },
     web_accessible_resources: [
       {
         resources: ['fonts/*.woff2', 'fonts/licenses/*.txt'],
