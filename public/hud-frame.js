@@ -222,7 +222,11 @@ function squareColor(index, thresholds, maxValue) {
 }
 
 function filledCount(value, maxValue) {
-  return Math.min(TOTAL_SQUARES, Math.max(0, Math.round((value / maxValue) * TOTAL_SQUARES)));
+  const raw = Math.round((value / maxValue) * TOTAL_SQUARES);
+  // If we have a real non-zero measurement but it rounds down to 0 filled segments,
+  // still show at least one filled segment (common for CLS near 0, or very good LCP/INP).
+  if (value > 0 && raw <= 0) return 1;
+  return Math.min(TOTAL_SQUARES, Math.max(0, raw));
 }
 
 function render() {
