@@ -16,9 +16,9 @@ const EXTENSION_HOME_URL = 'https://github.com/PageSpeed-cz/Core-Web-Vitals-LIVE
 const LOGO_SVG = `<svg viewBox="50 50 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M100 150C127.613 150 150 127.615 150 100C150 72.3849 127.613 50 100 50C72.387 50 50 72.3849 50 100C50 127.615 72.3849 150 100 150Z" fill="#FF00AA"/><path d="M90.9479 103.006L91.855 87.9079L117.152 89.3971L90.9479 103.006ZM129.954 92.1142C129.954 87.3428 128.408 83.5804 125.285 80.8591C122.16 78.1377 117.658 76.7611 111.744 76.7611H75.1232L70.9232 124.94H88.764L89.9069 111.468H108.689C115.24 111.468 120.447 109.721 124.246 106.261C128.042 102.8 129.958 98.0625 129.958 92.1163" fill="white"/></svg>`;
 
 // Heroicons (solid) — https://heroicons.com
-const ICON_POWER = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M11.983 1.659a.75.75 0 0 1 .425.964l-.652 1.957a7.252 7.252 0 1 1-3.512 0l-.652-1.957a.75.75 0 1 1 1.389-.463l.748 2.244a.75.75 0 0 1-.49.945 5.752 5.752 0 1 0 3.524 0 .75.75 0 0 1-.49-.945l.748-2.244a.75.75 0 0 1 .964-.425Z" clip-rule="evenodd" /><path d="M10 1.75a.75.75 0 0 1 .75.75v6a.75.75 0 0 1-1.5 0v-6A.75.75 0 0 1 10 1.75Z" /></svg>`;
-const ICON_X_CIRCLE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16ZM8.28 7.22a.75.75 0 0 1 1.06 0L10 7.94l.66-.72a.75.75 0 1 1 1.08 1.04L11.06 9l.68.74a.75.75 0 1 1-1.08 1.04L10 10.06l-.66.72a.75.75 0 0 1-1.08-1.04L8.94 9l-.68-.74a.75.75 0 0 1 .02-1.04Z" clip-rule="evenodd" /></svg>`;
-const ICON_CHEVRON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd" /></svg>`;
+const ICON_POWER = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><path fill-rule="evenodd" d="M11.983 1.659a.75.75 0 0 1 .425.964l-.652 1.957a7.252 7.252 0 1 1-3.512 0l-.652-1.957a.75.75 0 1 1 1.389-.463l.748 2.244a.75.75 0 0 1-.49.945 5.752 5.752 0 1 0 3.524 0 .75.75 0 0 1-.49-.945l.748-2.244a.75.75 0 0 1 .964-.425Z" clip-rule="evenodd" /><path d="M10 1.75a.75.75 0 0 1 .75.75v6a.75.75 0 0 1-1.5 0v-6A.75.75 0 0 1 10 1.75Z" /></svg>`;
+const ICON_X_CIRCLE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16ZM8.28 7.22a.75.75 0 0 1 1.06 0L10 7.94l.66-.72a.75.75 0 1 1 1.08 1.04L11.06 9l.68.74a.75.75 0 1 1-1.08 1.04L10 10.06l-.66.72a.75.75 0 0 1-1.08-1.04L8.94 9l-.68-.74a.75.75 0 0 1 .02-1.04Z" clip-rule="evenodd" /></svg>`;
+const ICON_CHEVRON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd" /></svg>`;
 
 function fontCss(): string {
   const mona = browser.runtime.getURL('/fonts/mona-sans-latin-wght-normal.woff2' as any);
@@ -171,17 +171,19 @@ ${fontCss()}
   border-radius: 10px;
   font-family: "Mona Sans Variable", system-ui, sans-serif;
   font-weight: 500;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.10);
 }
 .${HUD_ID} .${PREFIX}-iconbtn:hover {
   color: rgba(255, 255, 255, 0.9);
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.10);
 }
 .${HUD_ID} .${PREFIX}-iconbtn svg {
   display: block;
   width: 18px;
   height: 18px;
-  margin: 0 auto;
-  preserveAspectRatio: xMidYMid meet;
 }
 
 .${HUD_ID} .${PREFIX}-header-right {
@@ -193,6 +195,10 @@ ${fontCss()}
 .${HUD_ID} .${PREFIX}-icon-onoff { color: rgba(255, 255, 255, 0.85); }
 .${HUD_ID}.${PREFIX}-state-off .${PREFIX}-icon-onoff { color: rgba(255, 255, 255, 0.45); }
 .${HUD_ID} .${PREFIX}-icon-onoff.${PREFIX}-on { color: rgba(12, 206, 107, 0.95); }
+.${HUD_ID} .${PREFIX}-icon-onoff.${PREFIX}-on {
+  background: rgba(12, 206, 107, 0.14);
+  border-color: rgba(12, 206, 107, 0.40);
+}
 
 .${HUD_ID}.${PREFIX}-state-off {
   /* Keep the HUD "black glass" even when inactive; only the on/off icon indicates state. */
@@ -434,7 +440,7 @@ ${fontCss()}
   opacity: 0.35;
 }
 .${HUD_ID} .${PREFIX}-footer a.${PREFIX}-primary {
-  color: #FF00AA;
+  color: rgba(255, 255, 255, 0.95);
 }
 `;
 
