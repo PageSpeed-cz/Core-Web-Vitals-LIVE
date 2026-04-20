@@ -141,6 +141,13 @@ async function disableThrottling(tabId: number): Promise<void> {
 }
 
 export default defineBackground(() => {
+  browser.action.onClicked.addListener((tab) => {
+    const tabId = tab.id;
+    if (tabId == null) return;
+    // Always show the HUD on click. Enabled/disabled state is controlled inside the HUD.
+    browser.tabs.sendMessage(tabId, { type: 'SHOW_HUD' }).catch(() => {});
+  });
+
   browser.runtime.onMessage.addListener(
     (
       message: {
@@ -172,6 +179,20 @@ export default defineBackground(() => {
         return;
       }
 
+      if (message.type === 'GET_TAB_STATE') {
+        const tabId = message.tabId ?? sender.tab?.id;
+        if (tabId == null) {
+          sendResponse?.({ ok: false });
+          return;
+        }
+        sendResponse?.({
+          ok: true,
+          active: activeOverlayTabs.has(tabId),
+          throttled: throttledTabs.has(tabId),
+        });
+        return;
+      }
+
       if (message.type === 'TOGGLE_THROTTLING' && message.tabId != null) {
         const tabId = message.tabId;
         const enabled = message.enabled === true;
@@ -181,6 +202,21 @@ export default defineBackground(() => {
           disableThrottling(tabId).then(() => sendResponse?.({ ok: true }));
         }
         return true; // async response
+      }
+
+      if (message.type === 'TOGGLE_THROTTLING' && message.tabId == null) {
+        const tabId = sender.tab?.id;
+        if (tabId == null) {
+          sendResponse?.({ ok: false });
+          return;
+        }
+        const enabled = message.enabled === true;
+        if (enabled) {
+          enableThrottling(tabId).then(sendResponse);
+        } else {
+          disableThrottling(tabId).then(() => sendResponse?.({ ok: true }));
+        }
+        return true;
       }
 
       if (message.type === 'GET_THROTTLING_STATE' && message.tabId != null) {
@@ -201,8 +237,32 @@ export default defineBackground(() => {
         return;
       }
 
+      if (message.type === 'ACTIVATE_FOR_TAB' && message.tabId == null) {
+        const tabId = sender.tab?.id;
+        if (tabId == null) {
+          sendResponse?.({ ok: false });
+          return;
+        }
+        activeOverlayTabs.add(tabId);
+        browser.tabs.sendMessage(tabId, { type: 'ACTIVATE' }).catch(() => {});
+        sendResponse?.({ active: true });
+        return;
+      }
+
       if (message.type === 'DEACTIVATE_FOR_TAB' && message.tabId != null) {
         const tabId = message.tabId;
+        activeOverlayTabs.delete(tabId);
+        browser.tabs.sendMessage(tabId, { type: 'DEACTIVATE' }).catch(() => {});
+        sendResponse?.({ ok: true });
+        return;
+      }
+
+      if (message.type === 'DEACTIVATE_FOR_TAB' && message.tabId == null) {
+        const tabId = sender.tab?.id;
+        if (tabId == null) {
+          sendResponse?.({ ok: false });
+          return;
+        }
         activeOverlayTabs.delete(tabId);
         browser.tabs.sendMessage(tabId, { type: 'DEACTIVATE' }).catch(() => {});
         sendResponse?.({ ok: true });

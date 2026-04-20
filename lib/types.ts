@@ -26,6 +26,9 @@ export interface OptionsState {
   inpVizEnabled: boolean;
   lcpVizEnabled: boolean;
   throttlingEnabled: boolean;
+  hudOptionsExpanded: boolean;
+  /** Persisted HUD position in CSS pixels (viewport space). */
+  hudPosition: { top: number; left: number } | null;
 }
 
 export const DEFAULT_OPTIONS: OptionsState = {
@@ -33,6 +36,8 @@ export const DEFAULT_OPTIONS: OptionsState = {
   inpVizEnabled: true,
   lcpVizEnabled: true,
   throttlingEnabled: false,
+  hudOptionsExpanded: false,
+  hudPosition: null,
 };
 
 /** Thresholds: [good max, poor min] - same as web-vitals */

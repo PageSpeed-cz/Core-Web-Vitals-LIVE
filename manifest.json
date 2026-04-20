@@ -15,8 +15,7 @@
     "service_worker": "background.js"
   },
   "action": {
-    "default_title": "Core Web Vitals Live",
-    "default_popup": "popup.html"
+    "default_title": "Core Web Vitals Live"
   },
   "content_scripts": [
     {
