@@ -99,6 +99,15 @@ const throttledTabs = new Set<number>();
 const activeOverlayTabs = new Set<number>();
 const tabWorstRatings = new Map<number, Rating | null>();
 
+async function tabExists(tabId: number): Promise<boolean> {
+  try {
+    await browser.tabs.get(tabId);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 async function setActionIconForTab(tabId: number, rating: Rating | null): Promise<void> {
   const variant = ratingToVariant(rating);
   await browser.action.setIcon({
@@ -112,6 +121,9 @@ async function setActionIconForTab(tabId: number, rating: Rating | null): Promis
 
 async function enableThrottling(tabId: number): Promise<{ ok: boolean; error?: string }> {
   try {
+    if (!(await tabExists(tabId))) {
+      return { ok: false, error: `No tab with id: ${tabId}` };
+    }
     await chrome.debugger.attach({ tabId }, '1.3');
     await chrome.debugger.sendCommand({ tabId }, 'Emulation.setCPUThrottlingRate', {
       rate: CPU_THROTTLE_RATE,
@@ -132,6 +144,10 @@ async function enableThrottling(tabId: number): Promise<{ ok: boolean; error?: s
 }
 
 async function disableThrottling(tabId: number): Promise<void> {
+  if (!(await tabExists(tabId))) {
+    throttledTabs.delete(tabId);
+    return;
+  }
   try {
     await chrome.debugger.detach({ tabId });
   } catch {
