@@ -2,15 +2,39 @@
  * pagespeed.One – HUD overlay with gaming-style metric squares.
  */
 
-import type { MetricsState, MetricRating } from './types';
+import type { MetricsState, MetricRating, OptionsState } from './types';
 import { LCP_THRESHOLDS, INP_THRESHOLDS, CLS_THRESHOLDS } from './types';
+import { PRIVACY_POLICY_PAGE_URL } from './privacy-policy-url';
 
 const HUD_ID = 'cwv-live-hud';
 const PREFIX = 'cwv-live';
 const TOTAL_SQUARES = 10;
 const LOGO_URL = 'https://pagespeed.one/en';
+const TEST_INSIGHTS_URL = 'https://pagespeed.one/en/app/insights';
+const EXTENSION_HOME_URL = 'https://github.com/PageSpeed-cz/Core-Web-Vitals-LIVE';
 
 const LOGO_SVG = `<svg viewBox="50 50 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M100 150C127.613 150 150 127.615 150 100C150 72.3849 127.613 50 100 50C72.387 50 50 72.3849 50 100C50 127.615 72.3849 150 100 150Z" fill="#FF00AA"/><path d="M90.9479 103.006L91.855 87.9079L117.152 89.3971L90.9479 103.006ZM129.954 92.1142C129.954 87.3428 128.408 83.5804 125.285 80.8591C122.16 78.1377 117.658 76.7611 111.744 76.7611H75.1232L70.9232 124.94H88.764L89.9069 111.468H108.689C115.24 111.468 120.447 109.721 124.246 106.261C128.042 102.8 129.958 98.0625 129.958 92.1163" fill="white"/></svg>`;
+
+function fontCss(): string {
+  const mona = browser.runtime.getURL('/fonts/mona-sans-latin-wght-normal.woff2' as any);
+  const special = browser.runtime.getURL('/fonts/special-gothic-expanded-one-latin-400-normal.woff2' as any);
+  return `
+@font-face {
+  font-family: "Mona Sans Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 900;
+  src: url("${mona}") format("woff2-variations");
+}
+@font-face {
+  font-family: "Special Gothic Expanded One";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("${special}") format("woff2");
+}
+`;
+}
 
 const METRIC_NAMES: Record<string, string> = {
   LCP: 'Loading',
@@ -66,10 +90,12 @@ function ratingClass(rating: MetricRating): string {
 }
 
 const STYLES = `
+${fontCss()}
 .${HUD_ID} {
   position: fixed;
   z-index: 2147483646;
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: "Mona Sans Variable", system-ui, -apple-system, sans-serif;
+  font-weight: 500;
   font-size: 13px;
   line-height: 1.3;
   min-width: 260px;
@@ -86,11 +112,6 @@ const STYLES = `
   color: rgba(255, 255, 255, 0.95);
   transition: transform 0.2s ease, opacity 0.2s ease;
 }
-.${HUD_ID}.${PREFIX}-minimized {
-  opacity: 0.5;
-  transform: scale(0.9);
-}
-.${HUD_ID}.${PREFIX}-minimized .${PREFIX}-bars { display: none; }
 
 .${HUD_ID} .${PREFIX}-header {
   display: flex;
@@ -122,28 +143,47 @@ const STYLES = `
 }
 
 .${HUD_ID} .${PREFIX}-title {
-  font-family: system-ui, -apple-system, sans-serif;
-  font-size: 11px;
+  font-family: "Special Gothic Expanded One", "Mona Sans Variable", system-ui, -apple-system,
+    sans-serif;
   font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: rgba(255, 255, 255, 0.5);
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.95);
 }
 
-.${HUD_ID} .${PREFIX}-toggle {
+.${HUD_ID} .${PREFIX}-iconbtn {
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.6);
   cursor: pointer;
-  padding: 2px 6px;
+  padding: 2px 8px;
   font-size: 16px;
   line-height: 1;
   border-radius: 4px;
-  font-family: system-ui, sans-serif;
+  font-family: "Mona Sans Variable", system-ui, sans-serif;
+  font-weight: 500;
 }
-.${HUD_ID} .${PREFIX}-toggle:hover {
+.${HUD_ID} .${PREFIX}-iconbtn:hover {
   color: rgba(255, 255, 255, 0.9);
   background: rgba(255, 255, 255, 0.08);
+}
+
+.${HUD_ID} .${PREFIX}-header-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.${HUD_ID} .${PREFIX}-icon-onoff {
+  font-family: "Special Gothic Expanded One", "Mona Sans Variable", system-ui, -apple-system,
+    sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  letter-spacing: 0.06em;
+}
+
+.${HUD_ID}.${PREFIX}-state-off {
+  opacity: 0.6;
 }
 
 .${HUD_ID} .${PREFIX}-row {
@@ -159,7 +199,8 @@ const STYLES = `
 }
 
 .${HUD_ID} .${PREFIX}-name {
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: "Special Gothic Expanded One", "Mona Sans Variable", system-ui, -apple-system,
+    sans-serif;
   font-size: 14px;
   font-weight: 400;
   text-transform: uppercase;
@@ -168,7 +209,8 @@ const STYLES = `
 }
 
 .${HUD_ID} .${PREFIX}-abbr {
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: "Mona Sans Variable", system-ui, -apple-system, sans-serif;
+  font-weight: 500;
   font-size: 11px;
   text-transform: none;
   letter-spacing: 0;
@@ -217,6 +259,107 @@ const STYLES = `
   .${HUD_ID} .${PREFIX}-value { font-size: 12px; }
   .${HUD_ID} .${PREFIX}-sq { height: 6px; }
 }
+
+/* Options */
+.${HUD_ID} .${PREFIX}-divider {
+  margin: 12px 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.${HUD_ID} .${PREFIX}-options-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.92);
+  padding: 8px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+}
+.${HUD_ID} .${PREFIX}-options-toggle:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+.${HUD_ID} .${PREFIX}-chev {
+  opacity: 0.8;
+  transition: transform 0.2s ease;
+}
+.${HUD_ID}.${PREFIX}-options-open .${PREFIX}-chev {
+  transform: rotate(180deg);
+}
+.${HUD_ID} .${PREFIX}-options {
+  margin-top: 10px;
+  display: none;
+}
+.${HUD_ID}.${PREFIX}-options-open .${PREFIX}-options {
+  display: block;
+}
+
+.${HUD_ID} .${PREFIX}-opt-section {
+  margin-top: 10px;
+}
+.${HUD_ID} .${PREFIX}-opt-title {
+  margin: 0 0 8px;
+  font-family: "Special Gothic Expanded One", "Mona Sans Variable", system-ui, -apple-system,
+    sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  opacity: 0.9;
+  text-transform: uppercase;
+}
+.${HUD_ID} .${PREFIX}-opt-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(0,0,0,0.15);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.${HUD_ID} .${PREFIX}-opt-row + .${PREFIX}-opt-row { margin-top: 6px; }
+.${HUD_ID} .${PREFIX}-opt-label {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.${HUD_ID} .${PREFIX}-opt-label strong { font-size: 13px; }
+.${HUD_ID} .${PREFIX}-opt-desc {
+  font-size: 12px;
+  opacity: 0.75;
+  font-weight: 500;
+}
+.${HUD_ID} .${PREFIX}-switch {
+  flex-shrink: 0;
+}
+.${HUD_ID} .${PREFIX}-switch input {
+  width: 18px;
+  height: 18px;
+}
+
+.${HUD_ID} .${PREFIX}-links {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.${HUD_ID} .${PREFIX}-links a {
+  color: rgba(255,255,255,0.78);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 12px;
+}
+.${HUD_ID} .${PREFIX}-links a:hover {
+  color: rgba(255,255,255,0.95);
+  text-decoration: underline;
+}
 `;
 
 let state: Partial<MetricsState> = {};
@@ -224,14 +367,65 @@ let lastRating: Partial<Record<string, MetricRating>> = {};
 
 const HUD_DEFAULT_STYLE = 'top: 16px; right: 16px;';
 
-export function createHUD(): HTMLElement {
+export type HudCallbacks = {
+  onToggleActive: (nextActive: boolean) => void;
+  onClose: () => void;
+  onSetOptionsExpanded: (expanded: boolean) => void;
+  onSetOption: (partial: Partial<OptionsState>) => void;
+  onToggleThrottling: (enabled: boolean) => void;
+  onSetPosition: (pos: { top: number; left: number }) => void;
+};
+
+type HudUIState = {
+  active: boolean;
+  throttled: boolean;
+  options: OptionsState;
+};
+
+let callbacks: HudCallbacks | null = null;
+let uiState: HudUIState | null = null;
+
+function setHeaderState(root: HTMLElement) {
+  if (!uiState) return;
+  root.classList.toggle(`${PREFIX}-state-off`, !uiState.active);
+
+  const onoffBtn = root.querySelector(`[data-${PREFIX}-onoff]`) as HTMLButtonElement | null;
+  if (onoffBtn) {
+    onoffBtn.textContent = uiState.active ? '1' : '0';
+    onoffBtn.setAttribute('aria-label', uiState.active ? 'Turn off' : 'Turn on');
+  }
+
+  const throttleInput = root.querySelector(`#${PREFIX}-throttle`) as HTMLInputElement | null;
+  if (throttleInput) throttleInput.checked = uiState.throttled;
+
+  const clsInput = root.querySelector(`#${PREFIX}-cls`) as HTMLInputElement | null;
+  const inpInput = root.querySelector(`#${PREFIX}-inp`) as HTMLInputElement | null;
+  const lcpInput = root.querySelector(`#${PREFIX}-lcp`) as HTMLInputElement | null;
+  if (clsInput) clsInput.checked = uiState.options.clsVizEnabled;
+  if (inpInput) inpInput.checked = uiState.options.inpVizEnabled;
+  if (lcpInput) lcpInput.checked = uiState.options.lcpVizEnabled;
+
+  root.classList.toggle(`${PREFIX}-options-open`, uiState.options.hudOptionsExpanded);
+}
+
+export function createHUD(next: { callbacks: HudCallbacks; ui: HudUIState }): HTMLElement {
   const existing = document.getElementById(HUD_ID);
   if (existing) return existing;
+
+  callbacks = next.callbacks;
+  uiState = next.ui;
 
   const wrap = document.createElement('div');
   wrap.id = HUD_ID;
   wrap.className = HUD_ID;
-  wrap.setAttribute('style', HUD_DEFAULT_STYLE);
+  if (next.ui.options.hudPosition) {
+    const { top, left } = next.ui.options.hudPosition;
+    wrap.style.top = `${top}px`;
+    wrap.style.left = `${left}px`;
+    wrap.style.right = 'auto';
+  } else {
+    wrap.setAttribute('style', HUD_DEFAULT_STYLE);
+  }
 
   const style = document.createElement('style');
   style.textContent = STYLES;
@@ -244,7 +438,10 @@ export function createHUD(): HTMLElement {
       <a href="${LOGO_URL}" target="_blank" rel="noopener" class="${PREFIX}-logo" title="pagespeed.one">${LOGO_SVG}</a>
       <span class="${PREFIX}-title">Core Web Vitals Live</span>
     </div>
-    <button type="button" class="${PREFIX}-toggle" aria-label="Minimize">\u2212</button>
+    <div class="${PREFIX}-header-right">
+      <button type="button" class="${PREFIX}-iconbtn ${PREFIX}-icon-onoff" data-${PREFIX}-onoff aria-label="Turn on">0</button>
+      <button type="button" class="${PREFIX}-iconbtn" data-${PREFIX}-close aria-label="Close">\u00d7</button>
+    </div>
   `;
   wrap.appendChild(header);
 
@@ -283,20 +480,89 @@ export function createHUD(): HTMLElement {
   }
   wrap.appendChild(bars);
 
-  const toggleBtn = header.querySelector(
-    `.${PREFIX}-toggle`
-  ) as HTMLButtonElement;
-  toggleBtn?.addEventListener('click', (e) => {
+  const onoffBtn = header.querySelector(`[data-${PREFIX}-onoff]`) as HTMLButtonElement | null;
+  onoffBtn?.addEventListener('click', (e) => {
     e.stopPropagation();
-    wrap.classList.toggle(`${PREFIX}-minimized`);
-    toggleBtn.textContent = wrap.classList.contains(`${PREFIX}-minimized`)
-      ? '+'
-      : '\u2212';
-    toggleBtn.setAttribute(
-      'aria-label',
-      wrap.classList.contains(`${PREFIX}-minimized`) ? 'Expand' : 'Minimize'
-    );
+    if (!callbacks || !uiState) return;
+    callbacks.onToggleActive(!uiState.active);
   });
+
+  const closeBtn = header.querySelector(`[data-${PREFIX}-close]`) as HTMLButtonElement | null;
+  closeBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    callbacks?.onClose();
+  });
+
+  const divider1 = document.createElement('div');
+  divider1.className = `${PREFIX}-divider`;
+  wrap.appendChild(divider1);
+
+  const optionsToggle = document.createElement('button');
+  optionsToggle.type = 'button';
+  optionsToggle.className = `${PREFIX}-options-toggle`;
+  optionsToggle.innerHTML = `Show options <span class="${PREFIX}-chev">\u25be</span>`;
+  optionsToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (!callbacks || !uiState) return;
+    const nextExpanded = !uiState.options.hudOptionsExpanded;
+    callbacks.onSetOptionsExpanded(nextExpanded);
+  });
+  wrap.appendChild(optionsToggle);
+
+  const options = document.createElement('div');
+  options.className = `${PREFIX}-options`;
+  options.innerHTML = `
+    <div class="${PREFIX}-opt-section">
+      <div class="${PREFIX}-opt-row">
+        <div class="${PREFIX}-opt-label">
+          <strong>Emulate slower device</strong>
+          <div class="${PREFIX}-opt-desc">4\u00d7 CPU slowdown + Fast 4G network. A yellow browser bar will appear \u2014 this is normal and required for throttling.</div>
+        </div>
+        <div class="${PREFIX}-switch"><input id="${PREFIX}-throttle" type="checkbox" /></div>
+      </div>
+    </div>
+
+    <div class="${PREFIX}-opt-section">
+      <div class="${PREFIX}-opt-title">Visualizations</div>
+      <label class="${PREFIX}-opt-row">
+        <div class="${PREFIX}-opt-label"><strong>CLS (layout shifts)</strong></div>
+        <div class="${PREFIX}-switch"><input id="${PREFIX}-cls" type="checkbox" /></div>
+      </label>
+      <label class="${PREFIX}-opt-row">
+        <div class="${PREFIX}-opt-label"><strong>INP (interactions)</strong></div>
+        <div class="${PREFIX}-switch"><input id="${PREFIX}-inp" type="checkbox" /></div>
+      </label>
+      <label class="${PREFIX}-opt-row">
+        <div class="${PREFIX}-opt-label"><strong>LCP (largest content)</strong></div>
+        <div class="${PREFIX}-switch"><input id="${PREFIX}-lcp" type="checkbox" /></div>
+      </label>
+    </div>
+
+    <div class="${PREFIX}-links">
+      <a href="${TEST_INSIGHTS_URL}" target="_blank" rel="noopener">Test Your Site Speed</a>
+      <a href="${EXTENSION_HOME_URL}" target="_blank" rel="noopener">Extension Home</a>
+      <a href="${PRIVACY_POLICY_PAGE_URL}" target="_blank" rel="noopener">Privacy Policy</a>
+    </div>
+  `;
+  wrap.appendChild(options);
+
+  const throttleEl = options.querySelector(`#${PREFIX}-throttle`) as HTMLInputElement | null;
+  throttleEl?.addEventListener('change', () => {
+    if (!callbacks) return;
+    callbacks.onToggleThrottling(!!throttleEl.checked);
+    callbacks.onSetOption({ throttlingEnabled: !!throttleEl.checked });
+  });
+
+  function onVizChange() {
+    if (!callbacks) return;
+    const cls = (options.querySelector(`#${PREFIX}-cls`) as HTMLInputElement | null)?.checked ?? true;
+    const inp = (options.querySelector(`#${PREFIX}-inp`) as HTMLInputElement | null)?.checked ?? true;
+    const lcp = (options.querySelector(`#${PREFIX}-lcp`) as HTMLInputElement | null)?.checked ?? true;
+    callbacks.onSetOption({ clsVizEnabled: cls, inpVizEnabled: inp, lcpVizEnabled: lcp });
+  }
+  (options.querySelector(`#${PREFIX}-cls`) as HTMLInputElement | null)?.addEventListener('change', onVizChange);
+  (options.querySelector(`#${PREFIX}-inp`) as HTMLInputElement | null)?.addEventListener('change', onVizChange);
+  (options.querySelector(`#${PREFIX}-lcp`) as HTMLInputElement | null)?.addEventListener('change', onVizChange);
 
   let dragOffsetX = 0;
   let dragOffsetY = 0;
@@ -310,9 +576,13 @@ export function createHUD(): HTMLElement {
   const onMouseUp = () => {
     document.removeEventListener('mousemove', onMouseMove);
     document.removeEventListener('mouseup', onMouseUp);
+    if (!callbacks) return;
+    const rect = wrap.getBoundingClientRect();
+    callbacks.onSetPosition({ top: Math.max(0, rect.top), left: Math.max(0, rect.left) });
   };
   header.addEventListener('mousedown', (e) => {
-    if ((e.target as HTMLElement).closest(`.${PREFIX}-toggle, .${PREFIX}-logo`)) return;
+    if ((e.target as HTMLElement).closest(`[data-${PREFIX}-onoff], [data-${PREFIX}-close], .${PREFIX}-logo`))
+      return;
     const rect = wrap.getBoundingClientRect();
     dragOffsetX = e.clientX - rect.left;
     dragOffsetY = e.clientY - rect.top;
@@ -324,14 +594,24 @@ export function createHUD(): HTMLElement {
   });
 
   document.body.appendChild(wrap);
+  setHeaderState(wrap);
   return wrap;
 }
 
 export function updateHUD(
   root: HTMLElement,
-  newState: Partial<MetricsState>
+  newState: Partial<MetricsState>,
+  next?: Partial<HudUIState>
 ): void {
   state = { ...state, ...newState };
+  if (next && uiState) {
+    uiState = { ...uiState, ...next, options: { ...uiState.options, ...(next.options ?? {}) } };
+  } else if (next && !uiState) {
+    // first update after create (shouldn't happen, but keep safe)
+    uiState = next as HudUIState;
+  }
+  setHeaderState(root);
+
   const bars = root.querySelector(`.${PREFIX}-bars`);
   if (!bars) return;
 
@@ -388,4 +668,6 @@ export function destroyHUD(): void {
   document.getElementById(HUD_ID)?.remove();
   state = {};
   lastRating = {};
+  callbacks = null;
+  uiState = null;
 }
