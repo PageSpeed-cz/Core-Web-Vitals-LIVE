@@ -157,6 +157,7 @@ export default defineContentScript({
       hudWrap.style.background = 'rgba(0,0,0,0.01)'; // enable backdrop-filter
       (hudWrap.style as any).backdropFilter = 'blur(26px) saturate(1.35)';
       (hudWrap.style as any).webkitBackdropFilter = 'blur(26px) saturate(1.35)';
+      hudWrap.style.willChange = 'transform';
       hudWrap.style.top = options.hudPosition?.top != null ? `${options.hudPosition.top}px` : '16px';
       hudWrap.style.left = options.hudPosition?.left != null ? `${options.hudPosition.left}px` : 'auto';
       hudWrap.style.right = options.hudPosition ? 'auto' : '16px';
@@ -174,7 +175,12 @@ export default defineContentScript({
       hudFrameReady = false;
       let dragOffsetX = 0;
       let dragOffsetY = 0;
+      let dragStartLeft = 0;
+      let dragStartTop = 0;
       let dragging = false;
+      let pendingLeft = 0;
+      let pendingTop = 0;
+      let raf = 0;
 
       window.addEventListener('message', (event) => {
         const msg = event.data;
@@ -202,23 +208,43 @@ export default defineContentScript({
           const rect = hudWrap.getBoundingClientRect();
           dragOffsetX = (msg.clientX ?? 0) - rect.left;
           dragOffsetY = (msg.clientY ?? 0) - rect.top;
+          dragStartLeft = rect.left;
+          dragStartTop = rect.top;
+          pendingLeft = rect.left;
+          pendingTop = rect.top;
           dragging = true;
           return;
         }
         if (msg.type === 'HUD_DRAG_MOVE') {
           if (!dragging || !hudWrap) return;
-          const left = Math.max(0, (msg.clientX ?? 0) - dragOffsetX);
-          const top = Math.max(0, (msg.clientY ?? 0) - dragOffsetY);
-          hudWrap.style.left = `${left}px`;
-          hudWrap.style.top = `${top}px`;
-          hudWrap.style.right = 'auto';
+          const dx = typeof msg.dx === 'number' ? msg.dx : (msg.clientX ?? 0) - dragOffsetX - dragStartLeft;
+          const dy = typeof msg.dy === 'number' ? msg.dy : (msg.clientY ?? 0) - dragOffsetY - dragStartTop;
+          pendingLeft = Math.max(0, dragStartLeft + dx);
+          pendingTop = Math.max(0, dragStartTop + dy);
+          if (!raf) {
+            raf = requestAnimationFrame(() => {
+              raf = 0;
+              if (!hudWrap) return;
+              // Use transform while dragging to avoid layout churn/jitter.
+              const tx = pendingLeft - dragStartLeft;
+              const ty = pendingTop - dragStartTop;
+              hudWrap.style.transform = `translate3d(${tx}px, ${ty}px, 0)`;
+            });
+          }
           return;
         }
         if (msg.type === 'HUD_DRAG_END') {
           dragging = false;
           if (!hudWrap) return;
-          const rect = hudWrap.getBoundingClientRect();
-          saveOptions({ hudPosition: { top: Math.max(0, rect.top), left: Math.max(0, rect.left) } });
+          if (raf) {
+            cancelAnimationFrame(raf);
+            raf = 0;
+          }
+          hudWrap.style.transform = '';
+          hudWrap.style.right = 'auto';
+          hudWrap.style.left = `${pendingLeft}px`;
+          hudWrap.style.top = `${pendingTop}px`;
+          saveOptions({ hudPosition: { top: Math.max(0, pendingTop), left: Math.max(0, pendingLeft) } });
           return;
         }
         if (msg.type === 'HUD_CLOSE') {

@@ -140,10 +140,12 @@ function post(type, payload = {}) {
   const handle = root.querySelector('[data-drag-handle]');
   let dragging = false;
   let pointerId = null;
+  let startX = 0;
+  let startY = 0;
 
   const onMove = (e) => {
     if (!dragging) return;
-    post('HUD_DRAG_MOVE', { clientX: e.clientX, clientY: e.clientY });
+    post('HUD_DRAG_MOVE', { dx: e.clientX - startX, dy: e.clientY - startY });
   };
   const onUp = () => {
     if (!dragging) return;
@@ -163,6 +165,8 @@ function post(type, payload = {}) {
     if (e.target?.closest?.('button, a, input, label')) return;
     dragging = true;
     pointerId = e.pointerId;
+    startX = e.clientX;
+    startY = e.clientY;
     try {
       handle.setPointerCapture(pointerId);
     } catch {}
